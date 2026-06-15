@@ -1,0 +1,82 @@
+schema_version: "1.0"
+workflow:
+  id: "dev-feature"
+  name: "Feature Slice on Existing Target (SDD-driven)"
+  version: "0.1.0"
+  author: "[TBD]"
+  description: "Full lifecycle for a development slice on a registered target: specify → clarify → plan (with /dev.analyze, /dev.design for HIGH+) → tasks → implement (with /dev.implement + /dev.test + /dev.review) → audit."
+
+requires:
+  throughline_version: ">=0.7.2"
+  extensions:
+    - dev
+  integrations:
+    any: ["copilot", "claude"]
+
+inputs:
+  scope:
+    type: string
+    required: true
+    prompt: "Describe the slice (feature, fix, or refactor) including the target id"
+  target:
+    type: string
+    required: true
+    prompt: "Registered target id (run /dev.target register first if needed)"
+  integration:
+    type: string
+    default: "copilot"
+    prompt: "Integration to use (copilot, claude)"
+
+steps:
+  - id: verify-target
+    command: dev.target
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "inspect {{ inputs.target }}"
+
+  - id: specify
+    command: throughline.specify
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.scope }} (target: {{ inputs.target }})"
+
+  - id: clarify
+    command: throughline.clarify
+    integration: "{{ inputs.integration }}"
+    optional: true
+
+  - id: review-spec
+    type: gate
+    message: "Review the spec. Are target, scope, success criteria, and out-of-scope clear?"
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: plan
+    command: throughline.plan
+    integration: "{{ inputs.integration }}"
+    # /throughline.plan triggers /dev.analyze via extensions.yml: hooks.before_plan.
+    # HIGH/CRITICAL complexity → the plan runbook requires /dev.design before tasks.
+
+  - id: review-plan
+    type: gate
+    message: "Review the plan. Confidence ≥ 0.70? Citations attached? Design approved if HIGH/CRITICAL?"
+    options: [approve, reject, escalate]
+    on_reject: abort
+    on_escalate:
+      command: dev.review-escalated
+
+  - id: tasks
+    command: throughline.tasks
+    integration: "{{ inputs.integration }}"
+
+  - id: implement
+    command: throughline.implement
+    integration: "{{ inputs.integration }}"
+    # /throughline.implement chains /dev.implement → /dev.test → /dev.review per extension hooks.
+    # Reviewer FAIL after 2 retries auto-routes to /dev.review-escalated (Principle V).
+
+  - id: audit
+    command: dev.audit
+    integration: "{{ inputs.integration }}"
+    optional: true
+    description: "Optional portfolio roll-up after the slice completes."

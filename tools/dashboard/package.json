@@ -1,0 +1,94 @@
+{
+  "name": "sdd-dashboard",
+  "displayName": "Throughline Dashboard",
+  "description": "Live dashboard for Throughline: targets, slice lifecycle, work queue, review verdicts, escalations, and the operations log.",
+  "version": "0.1.0",
+  "publisher": "sdd-framework",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haeriamin/throughline"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sdd-dashboard",
+          "title": "Throughline Dashboard",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "sdd-dashboard": [
+        { "id": "sddTargets", "name": "Targets" },
+        { "id": "sddSlices", "name": "Slices" },
+        { "id": "sddQueue", "name": "Work Queue" },
+        { "id": "sddReports", "name": "Reports" }
+      ]
+    },
+    "commands": [
+      {
+        "command": "sdd.refresh",
+        "title": "Throughline: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "sdd.openDashboard",
+        "title": "Throughline: Open Dashboard",
+        "icon": "$(dashboard)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "sdd.openDashboard",
+          "when": "view == sddTargets || view == sddSlices || view == sddQueue || view == sddReports",
+          "group": "navigation@1"
+        },
+        {
+          "command": "sdd.refresh",
+          "when": "view == sddTargets || view == sddSlices || view == sddQueue || view == sddReports",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Throughline Dashboard",
+      "properties": {
+        "sddDashboard.frameworkRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the framework root (the folder containing .throughline/memory/constitution.md). Leave empty to auto-detect from workspace folders."
+        },
+        "sddDashboard.logTail": {
+          "type": "number",
+          "default": 15,
+          "description": "Number of recent operations-log entries shown on the dashboard."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}

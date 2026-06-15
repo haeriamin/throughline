@@ -1,0 +1,38 @@
+# Merged extension registry + SDD lifecycle hooks.
+# Hand-edits must keep hook semantics intact.
+schema_version: "1.0"
+
+extensions:
+  - id: dev
+    path: extensions/dev
+    version: "0.1.0"
+    enabled: true
+
+# Lifecycle hooks contributed by installed extensions.
+# Keys correspond to Throughline lifecycle phases; agents check this file per
+# .github/instructions/extension-hooks.instructions.md before/after each phase.
+hooks:
+  before_plan:
+    - extension: dev
+      command: dev.analyze
+      optional: true
+      prompt: "Run target codebase analysis before planning?"
+      description: "Produce an Analyst report so the plan is grounded in real modules, conventions, and risks"
+  before_implement:
+    - extension: dev
+      command: dev.review
+      optional: true
+      prompt: "Re-run review on prior artifacts before implementing?"
+      description: "Catch drift between prior outputs and current /standards state"
+  after_implement:
+    - extension: dev
+      command: dev.review
+      optional: false
+      prompt: "Review the implemented slice"
+      description: "No slice completes without Reviewer sign-off; review requires a fresh /dev.test report (Principles III, V)"
+  after_analyze:
+    - extension: dev
+      command: dev.audit
+      optional: true
+      prompt: "Roll up cross-slice audit after analysis?"
+      description: "Detect systemic patterns and exemplar gaps across recent slices"

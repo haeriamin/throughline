@@ -1,0 +1,9 @@
+# Single source for the four write-safety guards. tools/convert.{ps1,sh} renders this into each
+# tool's hook-config format. All tools call the SAME shared scripts in .github/hooks/scripts/.
+# Columns (tab-separated): id  phase  kind  script  timeout  message
+# phase: pre = before the tool runs (can block); post = after (observe/log only)
+# kind:  write = file edit/create/delete; shell = terminal command
+immutable-paths	pre	write	validate-immutable-paths	10	Guarding /standards/ + /exemplars/ (read-only)
+bash-safety	pre	shell	validate-bash-safety	10	Blocking writes to immutable paths + git push/merge (human-only)
+log-tool-use	post	write	log-tool-use	15	Appending to wiki/log.md
+check-code-quality	post	write	check-code-quality	30	Quality lint on written files

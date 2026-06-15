@@ -1,0 +1,13 @@
+# Project-level Codex CLI config for Throughline.
+# Codex reads <repo>/.codex/config.toml and <repo>/.codex/hooks.json (when the .codex layer is
+# trusted — run `/hooks` once to trust). General settings live in ~/.codex/config.toml.
+
+# Read a bit more project guidance, and fall back to CLAUDE.md if AGENTS.md is ever missing
+# (both carry the same non-negotiables; AGENTS.md is the canonical Codex copy).
+project_doc_max_bytes = 32768
+project_doc_fallback_filenames = ["CLAUDE.md"]
+
+# Personas:  .codex/agents/*.toml          (project-scoped subagents — 8 personas)
+# Commands:  .codex/prompts/*.md           (copy into ~/.codex/prompts/ to expose as /dev.* + /dev.*)
+# Hooks:     .codex/hooks.json             (read-only-paths guard, git push/merge guard, log, lint)
+# Global rules: ../AGENTS.md

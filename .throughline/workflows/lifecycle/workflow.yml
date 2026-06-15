@@ -1,0 +1,51 @@
+schema_version: "1.0"
+workflow:
+  id: "lifecycle"
+  name: "Throughline SDD Cycle"
+  version: "0.1.0"
+  author: "[TBD]"
+  description: "Throughline lifecycle: specify → clarify → plan → tasks → implement → analyze. Extension hooks fire per .throughline/extensions.yml."
+
+requires:
+  throughline_version: ">=0.7.2"
+  integrations:
+    any: ["copilot", "claude"]
+
+inputs:
+  scope:
+    type: string
+    required: true
+    prompt: "Describe the slice"
+  integration:
+    type: string
+    default: "copilot"
+    prompt: "Integration to use (copilot, claude)"
+
+steps:
+  - id: specify
+    command: throughline.specify
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.scope }}"
+
+  - id: clarify
+    command: throughline.clarify
+    integration: "{{ inputs.integration }}"
+    optional: true
+
+  - id: plan
+    command: throughline.plan
+    integration: "{{ inputs.integration }}"
+
+  - id: tasks
+    command: throughline.tasks
+    integration: "{{ inputs.integration }}"
+
+  - id: implement
+    command: throughline.implement
+    integration: "{{ inputs.integration }}"
+
+  - id: analyze
+    command: throughline.analyze
+    integration: "{{ inputs.integration }}"
+    optional: true

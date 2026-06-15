@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "additionalDirectories": [],
+    "deny": [
+      "Write(./standards/**)",
+      "Edit(./standards/**)",
+      "Write(./exemplars/**)",
+      "Edit(./exemplars/**)"
+    ]
+  },
+  "_hooks": "The read-only guard above is declarative and cross-platform. The script hooks (bash-safety, logging, quality lint) are wired per-OS into the gitignored .claude/settings.local.json by `tools/setup-hooks.py` -- run it once after cloning. See docs/runtimes/claude-code.md."
+}

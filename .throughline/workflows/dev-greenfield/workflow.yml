@@ -1,0 +1,92 @@
+schema_version: "1.0"
+workflow:
+  id: "dev-greenfield"
+  name: "Greenfield Project (SDD-driven)"
+  version: "0.1.0"
+  author: "[TBD]"
+  description: "New project from scratch: register target → specify → clarify → plan (+ mandatory /dev.design) → tasks → scaffold → implement → review → audit."
+
+requires:
+  throughline_version: ">=0.7.2"
+  extensions:
+    - dev
+  integrations:
+    any: ["copilot", "claude"]
+
+inputs:
+  scope:
+    type: string
+    required: true
+    prompt: "Describe the new project (purpose, users, core capability)"
+  path:
+    type: string
+    required: true
+    prompt: "Absolute path where the new project should be created"
+  stack:
+    type: string
+    default: ""
+    prompt: "Intended stack (csv, e.g. 'node,typescript') — leave empty to decide in design"
+  integration:
+    type: string
+    default: "copilot"
+    prompt: "Integration to use (copilot, claude)"
+
+steps:
+  - id: register-target
+    command: dev.target
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "register {{ inputs.path }} --new --stack {{ inputs.stack }}"
+
+  - id: specify
+    command: throughline.specify
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.scope }} (greenfield target at {{ inputs.path }})"
+
+  - id: clarify
+    command: throughline.clarify
+    integration: "{{ inputs.integration }}"
+    optional: true
+
+  - id: review-spec
+    type: gate
+    message: "Review the spec. Purpose, users, success criteria, and scope boundaries clear?"
+    options: [approve, reject]
+    on_reject: abort
+
+  - id: plan
+    command: throughline.plan
+    integration: "{{ inputs.integration }}"
+
+  - id: design
+    command: dev.design
+    integration: "{{ inputs.integration }}"
+    description: "Mandatory for greenfield: stack decision, project layout, and core contracts are ADRs."
+
+  - id: review-design
+    type: gate
+    message: "Review design.md. Stack ADR sound? Layout per standards? Approve to proceed."
+    options: [approve, reject, escalate]
+    on_reject: abort
+    on_escalate:
+      command: dev.review-escalated
+
+  - id: tasks
+    command: throughline.tasks
+    integration: "{{ inputs.integration }}"
+
+  - id: scaffold
+    command: dev.scaffold
+    integration: "{{ inputs.integration }}"
+    description: "Skeleton + verified quality loop (test/lint commands green on empty project)."
+
+  - id: implement
+    command: throughline.implement
+    integration: "{{ inputs.integration }}"
+    # Chains /dev.implement → /dev.test → /dev.review per extension hooks.
+
+  - id: audit
+    command: dev.audit
+    integration: "{{ inputs.integration }}"
+    optional: true

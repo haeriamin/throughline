@@ -1,0 +1,32 @@
+# Normalize all text to LF in the repo; keep LF on checkout for files where it matters.
+* text=auto
+
+# Shell scripts and hooks must be LF everywhere or they break on macOS/Linux and Git Bash.
+*.sh text eol=lf
+
+# Keep markdown/config LF for byte-identical skill parity across platforms (CI checks this).
+*.md text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.ts text eol=lf
+*.svg text eol=lf
+
+# PowerShell is fine with LF, but make it explicit.
+*.ps1 text eol=lf
+
+# Codex personas are TOML; pin LF so the generator's output stays byte-stable across OSes.
+*.toml text eol=lf
+
+# Adapter source of truth (.throughline/adapters/source + profiles). The generators parse these with
+# awk/PowerShell; a stray CR on a Windows checkout would leak into generated output and break the
+# convert.ps1 / convert.sh byte-parity that CI enforces. Keep them LF everywhere.
+*.persona text eol=lf
+*.command text eol=lf
+*.profile text eol=lf
+*.tsv text eol=lf
+*.mdc text eol=lf
+.windsurfrules text eol=lf
+
+# Binaries
+*.vsix binary
+*.png binary

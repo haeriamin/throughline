@@ -1,0 +1,19 @@
+# Target registry entry — one file per external project.
+# Created/maintained ONLY via /dev.target (Orchestrator). Humans may edit.
+id: my-app                        # unique kebab-case id; filename must be <id>.yml
+path: "C:/Repos/my-app"           # ABSOLUTE path; use forward slashes even on Windows (never backslashes — YAML reads "\t" etc. as escapes)
+vcs: git                          # git | none  (none → Principle VI backups apply)
+default_branch: main
+stack: []                         # e.g., [node, typescript, react]
+test_command: ""                  # e.g., "npm test" (run from target root)
+lint_command: ""                  # e.g., "npm run lint"
+build_command: ""                 # e.g., "npm run build"
+complexity_class: MEDIUM          # default class for slices on this target
+changelog: on                     # on | off — maintain <target>/.throughline/CHANGELOG.md (target-side change record)
+throughline_dir: .throughline     # where this target's SDD provenance lives (relative to target root)
+commit_artifacts: on              # on | off — commit <target>/.throughline/ SDD files on the slice branch (off → gitignored in the target)
+conventions: |
+  Repo-specific notes detected or human-provided.
+exceptions: []                    # ids from wiki/exception-registry.md applying here
+status: active                    # active | paused | archived
+registered: YYYY-MM-DD

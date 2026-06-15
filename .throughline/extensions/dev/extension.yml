@@ -1,0 +1,120 @@
+schema_version: "1.0"
+
+extension:
+  id: dev
+  name: "Software Development Workflow"
+  version: "0.1.0"
+  description: "Spec-driven software development on external target projects: analyze, design, scaffold, implement, test, review, and audit against standards and curated exemplars."
+  author: "sdd-agent-framework contributors"
+  repository: "[TBD — fill with the GitHub URL after first push]"
+  license: "MIT"
+
+requires:
+  throughline_version: ">=0.7.2"
+  tools:
+    - name: git
+      required: false
+
+provides:
+  commands:
+    - name: dev.feature
+      file: commands/dev.feature.md
+      description: "One-shot pipeline: full lifecycle on any target from a single request; empty targets auto-run greenfield mode (design + scaffold)"
+    - name: dev.target
+      file: commands/dev.target.md
+      description: "Register, inspect, or update an external target project in targets/"
+    - name: dev.ingest-standards
+      file: commands/dev.ingest-standards.md
+      description: "Ingest /standards documents into wiki/standards-summary.md"
+    - name: dev.ingest-exemplars
+      file: commands/dev.ingest-exemplars.md
+      description: "Ingest /exemplars into wiki/pattern-library.md"
+    - name: dev.ideate
+      file: commands/dev.ideate.md
+      description: "Read-only pre-spec ideation: explore options/trade-offs/risks, recommend a direction, build nothing"
+    - name: dev.analyze
+      file: commands/dev.analyze.md
+      description: "Run Analyst on a target codebase or scope; produce analysis report"
+    - name: dev.design
+      file: commands/dev.design.md
+      description: "Run Architect on a slice; produce design.md + ADR entries (HIGH/CRITICAL)"
+    - name: dev.scaffold
+      file: commands/dev.scaffold.md
+      description: "Scaffold a new project skeleton at a greenfield target path"
+    - name: dev.implement
+      file: commands/dev.implement.md
+      description: "Run Implementer on a tasked slice; write code at the target path"
+    - name: dev.test
+      file: commands/dev.test.md
+      description: "Run Tester on a slice; author/execute tests and produce a test report"
+    - name: dev.review
+      file: commands/dev.review.md
+      description: "Run Reviewer on an implemented slice; emit PASS/CONDITIONAL_PASS/FAIL"
+    - name: dev.audit
+      file: commands/dev.audit.md
+      description: "Run Auditor across review reports; emit portfolio summary"
+    - name: dev.lint-wiki
+      file: commands/dev.lint-wiki.md
+      description: "Lint the wiki for orphan pages, broken links, stale summaries, skill drift"
+    - name: dev.review-escalated
+      file: commands/dev.review-escalated.md
+      description: "Surface and triage escalated items from work-queue/escalated/"
+
+  config:
+    - name: "dev-config.yml"
+      template: "config-template.yml"
+      description: "Development runtime configuration (thresholds, paths, parallelism)"
+      required: false
+
+# SDD lifecycle hooks. Development runs INSIDE the Throughline lifecycle —
+# /throughline.plan delegates substantive analysis to /dev.analyze, and
+# /throughline.implement delegates execution to /dev.implement + /dev.test + /dev.review.
+hooks:
+  before_plan:
+    command: dev.analyze
+    optional: true
+    prompt: "Run target codebase analysis before planning?"
+    description: "Produce an Analyst report so the plan is grounded in real modules, conventions, and risks"
+  before_implement:
+    command: dev.review
+    optional: true
+    prompt: "Re-run review on prior artifacts before implementing?"
+    description: "Catch drift between prior outputs and current /standards state"
+  after_implement:
+    command: dev.review
+    optional: false
+    prompt: "Review the implemented slice"
+    description: "No slice completes without Reviewer sign-off; the review runbook requires a fresh /dev.test report first (Principles III, V)"
+  after_analyze:
+    command: dev.audit
+    optional: true
+    prompt: "Roll up cross-slice audit after analysis?"
+    description: "Detect systemic patterns and exemplar gaps across recent slices"
+
+tags:
+  - "software-development"
+  - "sdd"
+  - "multi-agent"
+  - "code-generation"
+
+config:
+  defaults:
+    confidence:
+      pass_threshold: 0.85
+      conditional_threshold: 0.70
+      test_evidence_weight: 0.40
+      standards_compliance_weight: 0.35
+      spec_alignment_weight: 0.25
+    retries:
+      max_implementer_retries: 2
+    parallelism:
+      max_in_progress: 3
+    paths:
+      standards_dir: "standards"
+      exemplars_dir: "exemplars"
+      wiki_dir: "wiki"
+      targets_dir: "targets"
+      queue_dir: "work-queue"
+      reports_dir: "audit"
+    branching:
+      slice_branch_prefix: "sdd/"

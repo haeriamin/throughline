@@ -1,0 +1,5 @@
+{
+  "branch_numbering": "sequential",
+  "default_spec_template": "spec-template.md",
+  "default_integration": "copilot"
+}

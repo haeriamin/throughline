@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "workflows": [
+    {
+      "id": "lifecycle",
+      "path": "workflows/lifecycle/workflow.yml",
+      "description": "Throughline SDD lifecycle: specify through analyze"
+    },
+    {
+      "id": "dev-feature",
+      "path": "workflows/dev-feature/workflow.yml",
+      "description": "Feature slice on an existing registered target"
+    },
+    {
+      "id": "dev-greenfield",
+      "path": "workflows/dev-greenfield/workflow.yml",
+      "description": "New project from scratch at a new target path"
+    },
+    {
+      "id": "dev-bugfix",
+      "path": "workflows/dev-bugfix/workflow.yml",
+      "description": "Contained bug fix on a registered target (micro lane: implement -> test -> review)"
+    },
+    {
+      "id": "dev-explore",
+      "path": "workflows/dev-explore/workflow.yml",
+      "description": "Read-only analysis of an area before changing it"
+    },
+    {
+      "id": "dev-review",
+      "path": "workflows/dev-review/workflow.yml",
+      "description": "Standalone review gate on a change that already exists"
+    }
+  ]
+}

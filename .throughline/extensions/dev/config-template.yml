@@ -1,0 +1,19 @@
+# dev-config.yml — per-framework runtime overrides for the dev extension.
+# Copy to repo root as dev-config.yml to override extension.yml config.defaults.
+# NOTE: confidence weights/thresholds are CONSTITUTIONAL — changing them here
+# without a /throughline.constitution amendment is a violation (Principle V).
+
+retries:
+  max_implementer_retries: 2
+
+parallelism:
+  max_in_progress: 3
+
+branching:
+  slice_branch_prefix: "sdd/"
+
+# Per-target overrides (keyed by target id). These refine targets/<id>.yml.
+targets: {}
+#  my-app:
+#    complexity_class: HIGH
+#    exceptions: [EXC-003]

@@ -1,0 +1,70 @@
+schema_version: "1.0"
+workflow:
+  id: "dev-bugfix"
+  name: "Contained Bug Fix (micro lane)"
+  version: "0.1.0"
+  author: "[TBD]"
+  description: "The collapsed lane for a genuinely small fix on a registered target: implement → test → review, skipping clarify/plan/design/tasks. Still produces a cited Decision Record, real test evidence (red before the fix, green after), and an independent review. This is the YAML form of `/dev.feature <target> \"...\" --micro`."
+
+requires:
+  throughline_version: ">=0.7.2"
+  extensions:
+    - dev
+  integrations:
+    any: ["copilot", "claude"]
+
+inputs:
+  scope:
+    type: string
+    required: true
+    prompt: "Describe the bug and the expected behaviour (e.g. 'Fix: pagination returns the wrong rows when page is negative')"
+  target:
+    type: string
+    required: true
+    prompt: "Registered target id (run /dev.target register first if needed)"
+  integration:
+    type: string
+    default: "copilot"
+    prompt: "Integration to use (copilot, claude)"
+
+steps:
+  - id: verify-target
+    command: dev.target
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "inspect {{ inputs.target }}"
+
+  - id: confirm-micro
+    type: gate
+    message: "Micro lane requires: analysis class LOW, single file, no public contract/schema/security surface, no new dependency. Does this fix qualify? Reject to run the full dev-feature workflow instead."
+    options: [approve, reject]
+    on_reject: abort
+    # If the fix turns out to touch a contract or security surface mid-flight, the
+    # Orchestrator aborts micro and restarts in the standard lane (dev-feature). See
+    # .throughline/extensions/dev/commands/dev.feature.md (Mode Detection / micro).
+
+  - id: implement
+    command: dev.implement
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.scope }} (target: {{ inputs.target }}, lane: micro)"
+    # Tiny inline spec lives in the work item (one paragraph), not a target-side .throughline/specs/ folder.
+
+  - id: test
+    command: dev.test
+    integration: "{{ inputs.integration }}"
+    description: "Write a test that fails before the fix and passes after, recorded as real evidence."
+
+  - id: review
+    command: dev.review
+    integration: "{{ inputs.integration }}"
+    # Independent Reviewer in a fresh context. FAIL after 2 retries auto-routes to
+    # /dev.review-escalated (Principle V).
+
+  - id: review-gate
+    type: gate
+    message: "Reviewer result: PASS / CONDITIONAL_PASS / FAIL. Approve to land the fix on its sdd/<slice> branch (you do the merge). Escalate if the Reviewer is unsure."
+    options: [approve, reject, escalate]
+    on_reject: abort
+    on_escalate:
+      command: dev.review-escalated
