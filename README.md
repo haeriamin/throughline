@@ -42,7 +42,8 @@ controlled study of LLM code generation:
 - **+38 points** more correct code than a strong baseline that was *already* told to probe edge
   cases and invalid inputs — driven by **grounding, not test quantity** (doubling the test budget
   barely moved the needle).
-- **Replicated across three model families** — Claude, GPT-5.3-codex, and Gemini.
+- **The effect replicated across three model families** — Claude (+38), GPT-5.3-codex (+28), and
+  Gemini (+19); it never reversed.
 - **Fewer false alarms too:** grounded testing wrongly rejected correct code **0%** of the time,
   vs **33%** for ungrounded "test the edges" prompting.
 - **A weaker model + this discipline beat a stronger model without it.**
