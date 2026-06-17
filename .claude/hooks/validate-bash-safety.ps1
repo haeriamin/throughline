@@ -15,7 +15,7 @@ $cmd = $data.tool_input.command
 if ($null -eq $cmd -or "$cmd" -eq "") { exit 0 }
 $c = "$cmd".Replace('\', '/')
 
-if ($c -match '(^|[;&|]\s*)git\s+(push|merge)\b') {
+if ($c -match '(^|[;&|"]|\\n)\s*git(\s+(-c\s+\S+|-C\s+\S+|--[a-zA-Z-]+(=\S+)?|-[a-zA-Z]+))*\s+(push|merge)([^a-zA-Z0-9_]|$)') {
     [Console]::Error.WriteLine("BLOCKED: 'git push' / 'git merge' are human-only actions (Constitution Principle VI).")
     [Console]::Error.WriteLine("Present the sdd/<slice> branch in your report; the human merges.")
     exit 2

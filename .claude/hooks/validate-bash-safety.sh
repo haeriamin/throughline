@@ -29,7 +29,7 @@ else
   C="${INPUT//\\//}"
 fi
 
-if echo "$C" | grep -qE '(^|[;&|"]|\\\\n)[[:space:]]*git[[:space:]]+(push|merge)\b'; then
+if echo "$C" | grep -qE '(^|[;&|"]|\\\\n)[[:space:]]*git([[:space:]]+(-c[[:space:]]+[^[:space:]]+|-C[[:space:]]+[^[:space:]]+|--[a-zA-Z-]+(=[^[:space:]]+)?|-[a-zA-Z]+))*[[:space:]]+(push|merge)([^a-zA-Z0-9_]|$)'; then
   echo "BLOCKED: 'git push' / 'git merge' are human-only actions (Constitution Principle VI)." >&2
   echo "Present the sdd/<slice> branch in your report; the human merges." >&2
   exit 2
