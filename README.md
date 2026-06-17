@@ -67,7 +67,7 @@ Eight agents, each with one job, handing off through files rather than reaching 
 
 The review step is the heart of it. The Reviewer reads your standards from source (not the implementer's summary of them) and returns PASS, CONDITIONAL_PASS, or FAIL on a confidence score. It's the same kind of model on both sides, so treat it as a strong check rather than a second human. Your merge is the real final check.
 
-A few things hold this together. Every change cites the spec requirement it satisfies, the standard clause it follows, and an example when one exists, so it's cite-or-don't-ship. Each change is a *slice* (one feature, fix, or refactor), and all of its edits land on a dedicated git branch named `sdd/<slice>` — e.g. `sdd/orders-pagination` (`sdd` = spec-driven development). Nothing touches your main branch until you merge; to undo, just delete the branch. Agents never merge or push, and `/standards/` is read-only at the hook level. And the knowledge compounds: your standards, examples, and past decisions live in a shared wiki that every later task draws on.
+A few things hold this together. Every change cites the spec requirement it satisfies, the standard clause it follows, and an example when one exists, so it's cite-or-don't-ship. Each change is a *slice* (one feature, fix, or refactor), and all of its edits land on a dedicated git branch named `sdd/<slice>` — e.g. `sdd/orders-pagination` (`sdd` = spec-driven development) — created **in your target project's own repo**, not in the framework. Nothing touches your main branch until you merge; to undo, just delete the branch. (A target with no git repo is handled too: originals are backed up under `work-queue/backups/<slice>/` instead.) Agents never merge or push, and `/standards/` is read-only at the hook level. And the knowledge compounds: your standards, examples, and past decisions live in a shared wiki that every later task draws on.
 
 ### Does the review actually catch real bugs?
 
@@ -87,7 +87,7 @@ Throughline has also solved a real **SWE-bench Lite** issue end to end (in `pyte
 
 Close to nothing. Throughline is mostly markdown the model reads; the engine is the AI tool you already have.
 
-- **git** — for the reversible per-change branches (`sdd/<slice>`, [explained below](#how-it-works)) and to read your target's state.
+- **git** — for the reversible per-change branches (`sdd/<slice>`, [explained above](#how-it-works)) and to read your target's state.
 - **One AI coding tool** — GitHub Copilot in VS Code, Claude Code, or Codex. That's the engine.
 - That's it. spec-kit isn't a separate install (its commands and its bash + PowerShell helper scripts ship inside `.specify/`), and the write-safety hooks need no extra runtime — they run on PowerShell on Windows and bash on macOS/Linux, with a plain-shell fallback so **Python is not required** (there's an optional Python path if you prefer it). The VS Code dashboard is optional and ships as a prebuilt `.vsix`, so it needs no Node build.
 
