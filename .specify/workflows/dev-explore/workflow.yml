@@ -1,0 +1,50 @@
+schema_version: "1.0"
+workflow:
+  id: "dev-explore"
+  name: "Understand an Area Before Changing It"
+  version: "0.1.0"
+  author: "[TBD]"
+  description: "A read-only pass over part of a registered target so a later change starts from how the code really works. The Analyst maps the modules, the conventions the code actually follows, and where the complexity sits, then writes a grounded report (with a source fingerprint) into work-queue/. No code is written. This is the YAML form of `/dev.analyze <target> [path]`."
+
+requires:
+  speckit_version: ">=0.7.2"
+  extensions:
+    - dev
+  integrations:
+    any: ["copilot", "claude"]
+
+inputs:
+  target:
+    type: string
+    required: true
+    prompt: "Registered target id (run /dev.target register first if needed)"
+  path:
+    type: string
+    default: ""
+    prompt: "Optional sub-path to focus on (e.g. src/billing) — leave empty to map the whole target"
+  integration:
+    type: string
+    default: "copilot"
+    prompt: "Integration to use (copilot, claude)"
+
+steps:
+  - id: verify-target
+    command: dev.target
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "inspect {{ inputs.target }}"
+
+  - id: analyze
+    command: dev.analyze
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.target }} {{ inputs.path }}"
+    description: "Analyst produces a grounded report in work-queue/ with a fingerprint of the source it read. Read-only; no branch, no code."
+
+  - id: next-step
+    type: gate
+    message: "Report ready in work-queue/. Build on it now? Approve to hand off to dev-feature (or dev-bugfix for a contained fix); reject to stop here with the report as the deliverable."
+    options: [approve, reject]
+    on_reject: abort
+    # On approve, the Orchestrator carries the analysis into the chosen change workflow;
+    # the report is the spec/plan's grounding input rather than a fresh guess.

@@ -6,6 +6,8 @@ The rule of thumb: **a change goes through Throughline; a question goes to plain
 
 Commands below use the dot form (`/dev.feature`), which is what Copilot and Codex use. On Claude Code, swap the dot for a colon (`/dev:feature`).
 
+Each task here is backed by a named workflow under [`.specify/workflows/`](../.specify/workflows/) — that YAML is the source of truth for the steps and gates; the commands below are just how you invoke them. The map: build a feature → `dev-feature`, fix a bug → `dev-bugfix`, understand an area → `dev-explore`, review a change → `dev-review`, new project → `dev-greenfield`.
+
 ## Build a feature
 
 The headline case. Describe what you want and let the lifecycle run.

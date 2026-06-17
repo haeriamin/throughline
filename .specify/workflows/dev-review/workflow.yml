@@ -1,0 +1,40 @@
+schema_version: "1.0"
+workflow:
+  id: "dev-review"
+  name: "Standalone Review Gate"
+  version: "0.1.0"
+  author: "[TBD]"
+  description: "Run the review gate on its own, without the rest of the lifecycle, on a change that already exists (an agent's or a teammate's). The Reviewer re-reads your standards from source — not the implementer's summary of them — and returns PASS / CONDITIONAL_PASS / FAIL with cited findings. This is the YAML form of `/dev.review <slice-id>`."
+
+requires:
+  speckit_version: ">=0.7.2"
+  extensions:
+    - dev
+  integrations:
+    any: ["copilot", "claude"]
+
+inputs:
+  slice:
+    type: string
+    required: true
+    prompt: "Slice id (or change reference) to review"
+  integration:
+    type: string
+    default: "copilot"
+    prompt: "Integration to use (copilot, claude)"
+
+steps:
+  - id: review
+    command: dev.review
+    integration: "{{ inputs.integration }}"
+    input:
+      args: "{{ inputs.slice }}"
+    description: "Independent Reviewer in a fresh context; reads standards from source and cites findings into review-reports/."
+
+  - id: review-gate
+    type: gate
+    message: "Reviewer result: PASS / CONDITIONAL_PASS / FAIL. Approve to accept; escalate for a second pass if the Reviewer is unsure or the finding is contested."
+    options: [approve, reject, escalate]
+    on_reject: abort
+    on_escalate:
+      command: dev.review-escalated
