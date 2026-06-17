@@ -93,6 +93,11 @@ bug in **all three**:
 *Honest limit:* these tasks had tricky edges on purpose — that's where the check pays off; on a
 simple task done right it catches nothing. → [full run](docs/validation-runs/2026-06-13-ab-suite.md)
 
+**On a recognized benchmark:** Throughline solved a real **SWE-bench Lite** issue end-to-end
+(`pytest-dev/pytest`) from the bug report alone — its one-line root-cause fix passes the benchmark's
+own hidden test with no regressions (115 passing), and the Tester independently generalized the
+coverage beyond the gold case. → [full run](docs/validation-runs/2026-06-16-swebench-pytest-11143.md)
+
 ## How to use it
 
 ### 1. Pick your host — same framework, three adapters
