@@ -16,7 +16,7 @@ try:
 except Exception:
     print(''); sys.exit(0)
 ti = data.get('tool_input') or {}
-for field in ['file_path', 'path', 'notebook_path']:
+for field in ['file_path', 'path', 'notebook_path', 'target', 'destination']:
     if field in ti:
         print(ti[field]); sys.exit(0)
 print('')
@@ -25,7 +25,7 @@ fi
 if [ -z "$FILE_PATH" ]; then
   # No interpreter, or it produced nothing (e.g. a broken/stub python): fall back to grep.
   FILE_PATH=$(printf '%s' "$INPUT" \
-    | grep -oE '"(file_path|path|notebook_path)"[[:space:]]*:[[:space:]]*"[^"]*"' \
+    | grep -oE '"(file_path|path|notebook_path|target|destination)"[[:space:]]*:[[:space:]]*"[^"]*"' \
     | head -1 | sed -E 's/.*:[[:space:]]*"([^"]*)"$/\1/')
 fi
 

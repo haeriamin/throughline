@@ -16,7 +16,7 @@ try:
 except Exception:
     sys.exit(0)
 ti = data.get('tool_input') or {}
-fp = next((ti[f] for f in ['file_path', 'path', 'notebook_path'] if f in ti), '')
+fp = next((ti[f] for f in ['file_path', 'path', 'notebook_path', 'target', 'destination'] if f in ti), '')
 print('TOOL_NAME=' + shlex.quote(data.get('tool_name', 'unknown')))
 print('FILE_PATH=' + shlex.quote(fp))
 print('ROOT=' + shlex.quote(data.get('cwd', '.')))
@@ -25,7 +25,7 @@ fi
 if [ -z "${FILE_PATH:-}" ]; then
   # No interpreter, or it produced nothing (e.g. a broken/stub python): fall back to grep.
   FILE_PATH=$(printf '%s' "$INPUT" \
-    | grep -oE '"(file_path|path|notebook_path)"[[:space:]]*:[[:space:]]*"[^"]*"' \
+    | grep -oE '"(file_path|path|notebook_path|target|destination)"[[:space:]]*:[[:space:]]*"[^"]*"' \
     | head -1 | sed -E 's/.*:[[:space:]]*"([^"]*)"$/\1/')
   TOOL_NAME=$(printf '%s' "$INPUT" \
     | grep -oE '"tool_name"[[:space:]]*:[[:space:]]*"[^"]*"' \

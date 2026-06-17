@@ -5,7 +5,7 @@
 #  - blocks `git push` and `git merge` (merging/pushing is human — Constitution Principle VI)
 # Conservative by design: read-only commands mentioning an immutable path together with a
 # write token are blocked too — re-form the command without the write token.
-# Protocol: stdin JSON {tool_name, tool_input:{command}}; exit 2 + stderr = block.
+# Protocol: stdin JSON {tool_name, tool_input:{command}}; exit 1 + stderr = block.
 # Dependency-free: parses the command with a JSON tool if present; otherwise scans the raw
 # payload (fail-safe — the raw JSON still contains the command, so this can only over-block).
 set -uo pipefail
@@ -34,16 +34,16 @@ else
 fi
 
 if echo "$C" | grep -qE '(^|[;&|"]|\\\\n)[[:space:]]*git([[:space:]]+(-c[[:space:]]+[^[:space:]]+|-C[[:space:]]+[^[:space:]]+|--[a-zA-Z-]+(=[^[:space:]]+)?|-[a-zA-Z]+))*[[:space:]]+(push|merge)([^a-zA-Z0-9_]|$)'; then
-  echo "BLOCKED: 'git push' / 'git merge' are human-only actions (Constitution Principle VI)." >&2
-  echo "Present the sdd/<slice> branch in your report; the human merges." >&2
-  exit 2
+  echo "BLOCKED: 'git push' / 'git merge' are human-only actions (Constitution Principle VI)."
+  echo "Present the sdd/<slice> branch in your report; the human merges."
+  exit 1
 fi
 
 if echo "$C" | grep -qE '(^|/|[[:space:]"'"'"'=])(standards|exemplars)/'; then
   if echo "$C" | grep -qE '(>|>>|\btee\b|\bcp\b|\bmv\b|\brm\b|\brmdir\b|\btouch\b|\bln\b|\bsed[[:space:]]+-i\b|\bdd\b|\binstall\b)'; then
-    echo "BLOCKED: shell command combines an immutable path (/standards/ or /exemplars/) with a write operation (Constitution Principle I)." >&2
-    echo "These directories are human-curated and READ ONLY to agents. Read without redirection, or stop and escalate." >&2
-    exit 2
+    echo "BLOCKED: shell command combines an immutable path (/standards/ or /exemplars/) with a write operation (Constitution Principle I)."
+    echo "These directories are human-curated and READ ONLY to agents. Read without redirection, or stop and escalate."
+    exit 1
   fi
 fi
 exit 0

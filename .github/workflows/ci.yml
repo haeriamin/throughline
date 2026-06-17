@@ -64,26 +64,29 @@ jobs:
           echo '{"tool_input":{"command":"cat standards/api-design.md"}}' \
             | .claude/hooks/validate-bash-safety.sh
 
-      - name: Referenced hook scripts exist
+      - name: Hook wiring resolves to real scripts
         run: |
+          # Claude + Codex hooks are wired per-OS into machine-local files by setup-hooks
+          # (Claude's land in the gitignored .claude/settings.local.json). Generate them for
+          # this OS, then confirm every hook command in every runtime's config points at a
+          # script that exists. This also exercises tools/setup-hooks.py end to end.
+          python3 tools/setup-hooks.py
           python3 - <<'PY'
-          import json, pathlib, sys, re
+          import json, pathlib, re, sys
           missing = []
-          h = json.load(open(".github/hooks/hooks.json"))["hooks"]
-          for phase in h.values():
-              for entry in phase:
-                  for key in ("command", "windows"):
-                      v = entry.get(key, "")
-                      m = re.search(r'(\.github/hooks/scripts/[\w.-]+)', v)
-                      if m and not pathlib.Path(m.group(1)).exists():
-                          missing.append(m.group(1))
-          s = json.load(open(".claude/settings.json"))["hooks"]
-          for phase in s.values():
-              for grp in phase:
-                  for entry in grp["hooks"]:
-                      m = re.search(r'(\.claude/hooks/[\w.-]+)', entry["command"])
-                      if m and not pathlib.Path(m.group(1)).exists():
-                          missing.append(m.group(1))
+          def check(path, keys):
+              data = json.load(open(path))
+              hooks = data.get("hooks", data)
+              for phase in hooks.values():
+                  for grp in phase:
+                      for entry in grp.get("hooks", [grp]):
+                          for key in keys:
+                              m = re.search(r'((?:\.github/hooks/scripts|\.claude/hooks)/[\w.-]+)', entry.get(key, ""))
+                              if m and not pathlib.Path(m.group(1)).exists():
+                                  missing.append(f"{path}: {m.group(1)}")
+          check(".github/hooks/hooks.json", ("command", "windows"))   # Copilot (per-OS in one file)
+          check(".claude/settings.local.json", ("command",))          # Claude (generated above)
+          check(".codex/hooks.json", ("command",))                    # Codex (generated above)
           if missing:
               print("MISSING HOOK SCRIPTS:", *sorted(set(missing)), sep="\n  "); sys.exit(1)
           print("all referenced hook scripts present")

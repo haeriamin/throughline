@@ -4,7 +4,7 @@
 #  - blocks `git push` and `git merge` (merging/pushing is human — Constitution Principle VI)
 # Conservative by design: a read-only command that merely mentions an immutable path together
 # with a write token is blocked too — re-form the command without the write token.
-# Protocol: stdin JSON {tool_name, tool_input:{command}}; exit 2 + stderr = block.
+# Protocol: stdin JSON {tool_name, tool_input:{command}}; exit 1 + stdout = block.
 $ErrorActionPreference = "SilentlyContinue"
 
 $raw = [Console]::In.ReadToEnd()
@@ -16,17 +16,17 @@ if ($null -eq $cmd -or "$cmd" -eq "") { exit 0 }
 $c = "$cmd".Replace('\', '/')
 
 if ($c -match '(^|[;&|"]|\\n)\s*git(\s+(-c\s+\S+|-C\s+\S+|--[a-zA-Z-]+(=\S+)?|-[a-zA-Z]+))*\s+(push|merge)([^a-zA-Z0-9_]|$)') {
-    [Console]::Error.WriteLine("BLOCKED: 'git push' / 'git merge' are human-only actions (Constitution Principle VI).")
-    [Console]::Error.WriteLine("Present the sdd/<slice> branch in your report; the human merges.")
-    exit 2
+    Write-Output "BLOCKED: 'git push' / 'git merge' are human-only actions (Constitution Principle VI)."
+    Write-Output "Present the sdd/<slice> branch in your report; the human merges."
+    exit 1
 }
 
 if ($c -match '(^|/|\s|["'']|=)(standards|exemplars)/') {
     $writeTokens = '(>|>>|\btee\b|\bcp\b|\bmv\b|\brm\b|\brmdir\b|\btouch\b|\bln\b|\bsed\s+-i\b|\bdd\b|\binstall\b|Set-Content|Add-Content|Out-File|Copy-Item|Move-Item|Remove-Item|New-Item)'
     if ($c -match $writeTokens) {
-        [Console]::Error.WriteLine("BLOCKED: shell command combines an immutable path (/standards/ or /exemplars/) with a write operation (Constitution Principle I).")
-        [Console]::Error.WriteLine("These directories are human-curated and READ ONLY to agents. Read without redirection, or stop and escalate.")
-        exit 2
+        Write-Output "BLOCKED: shell command combines an immutable path (/standards/ or /exemplars/) with a write operation (Constitution Principle I)."
+        Write-Output "These directories are human-curated and READ ONLY to agents. Read without redirection, or stop and escalate."
+        exit 1
     }
 }
 exit 0
