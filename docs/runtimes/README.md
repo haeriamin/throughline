@@ -19,12 +19,13 @@ Tools differ in how much of the constitution they can *enforce* (not just be tol
 
 | Tier | What it means | Tools |
 |------|---------------|-------|
-| **A — enforced** | Blocking hooks back the guarantees: writes to `/standards/` + `/exemplars/` are blocked, `git push`/merge is blocked, and `wiki/log.md` is appended automatically. | Claude Code, GitHub Copilot, Codex, Cursor, Antigravity, OpenCode, Qwen Code, Kimi Code |
+| **A — enforced** | Blocking hooks back the guarantees: writes to `/standards/` + `/exemplars/` are blocked, `git push`/merge is blocked, and `wiki/log.md` is appended automatically. | Claude Code, GitHub Copilot (VS Code + CLI), Codex, Cursor, Antigravity, OpenCode, Qwen Code, Kimi Code |
 | **B — rules-only** | No hooks and no subagents. The same rules are *instructed* in a rules file but not enforced — you honor them yourself. Good for editing; use a Tier A tool when the guarantees matter. | Aider, Windsurf |
 
 | Tool | Slash syntax | Tier | Status | Reach for it if… |
 |------|--------------|------|--------|------------------|
 | **GitHub Copilot** (VS Code) | `/dev.analyze` (dot) | A | Supported | You live in VS Code |
+| **GitHub Copilot CLI** | agents (no slash cmds) | A | Preview | You want Copilot in the terminal |
 | **Claude Code** | `/dev:analyze` (colon) | A | Supported | You want a terminal-native agent |
 | **Codex** | `/dev.analyze` (dot) | A | Preview | You're on OpenAI Codex |
 | **Cursor** | `/dev.analyze` (dot) | A | Preview | You work in Cursor |
@@ -38,6 +39,7 @@ Tools differ in how much of the constitution they can *enforce* (not just be tol
 Step-by-step guide for each:
 
 - [Copilot](copilot.md)
+- [GitHub Copilot CLI](copilot-cli.md) (preview; reuses `.github/`, guard enforcement advisory until verified)
 - [Claude Code](claude-code.md)
 - [Codex](codex.md) (preview, with one runtime behaviour still to verify; see the page)
 - [Cursor](cursor.md) (preview; hooks ship fail-open until the verification spike passes)

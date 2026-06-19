@@ -7,13 +7,18 @@ The constitution carries its own version; amendments are logged in `wiki/log.md`
 
 ### Added
 - **Multi-tool adapter generator** — `tools/convert.{ps1,sh}` and `tools/install.{ps1,sh}` render
-  thin per-tool wiring from `.throughline/adapters/source/` (personas, commands, hooks, rules). Ten
-  tools: Claude Code, Copilot, Codex, Cursor, Antigravity, OpenCode, Qwen Code, Kimi Code (Tier A);
-  Aider, Windsurf (Tier B rules-only). CI fails on adapter drift and ps1/bash parity.
+  thin per-tool wiring from `.throughline/adapters/source/` (personas, commands, hooks, rules). Eleven
+  tools: Claude Code, GitHub Copilot (VS Code), GitHub Copilot CLI, Codex, Cursor, Antigravity,
+  OpenCode, Qwen Code, Kimi Code (Tier A); Aider, Windsurf (Tier B rules-only). CI fails on adapter
+  drift and ps1/bash parity.
 - **Cursor runtime adapter (preview)** — `.cursor/agents/`, `.cursor/commands/`,
   `.cursor/rules/throughline.mdc`, staged hooks template; see `.cursor/VERIFICATION.md`.
 - **Codex CLI runtime adapter (preview)** — generated from shared source; 8 personas, 22 commands,
   `AGENTS.md`, `.codex/hooks.json`. Verification spike pending (`.codex/VERIFICATION.md`).
+- **GitHub Copilot CLI runtime adapter (preview)** — reuses the shared `.github/` surface
+  (`copilot-instructions.md`, `instructions/`, `agents/`, `AGENTS.md`) plus a CLI-format hook config at
+  `.github/hooks/copilot-cli.json`. Knowledge + lifecycle work today; `preToolUse` guard enforcement is
+  advisory until verified (`docs/runtimes/copilot-cli.md`).
 - **`/dev.ideate`** — a read-only, pre-spec ideation command (14th `/dev.*` command). The Analyst
   explores distinct approaches with their trade-offs and risks, grounds them in the target, asks
   the questions that matter, recommends a direction, and writes an ideation note — building nothing.

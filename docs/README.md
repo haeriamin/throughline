@@ -19,7 +19,7 @@ what you need.
 **What to use it for**: [Common tasks and examples](use-cases.md) — fix a bug, understand an area,
 review a change, build a feature, and when to just use plain chat instead.
 
-**Choose your host**: [Runtimes — Copilot, Claude Code, Codex, Cursor, Antigravity, OpenCode, Qwen, Kimi (+ rules-only Aider/Windsurf)](runtimes/) — step-by-step setup
+**Choose your host**: [Runtimes — Copilot (VS Code + CLI), Claude Code, Codex, Cursor, Antigravity, OpenCode, Qwen, Kimi (+ rules-only Aider/Windsurf)](runtimes/) — step-by-step setup
 and the five ways to use the framework on each.
 
 **Before you adopt it**: [STATUS.md](../STATUS.md) — an honest look at how ready it is, what

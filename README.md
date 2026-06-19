@@ -78,6 +78,7 @@ Throughline is the same framework behind many thin adapters, all generated from 
 |------|--------------|------|--------|-------|
 | Claude Code | `/dev:feature` | A | Supported | [docs/runtimes/claude-code.md](docs/runtimes/claude-code.md) |
 | GitHub Copilot (VS Code) | `/dev.feature` | A | Supported | [docs/runtimes/copilot.md](docs/runtimes/copilot.md) |
+| **GitHub Copilot CLI** | agents | A | Preview | [docs/runtimes/copilot-cli.md](docs/runtimes/copilot-cli.md) |
 | Codex | `/dev.feature` | A | Preview | [docs/runtimes/codex.md](docs/runtimes/codex.md) |
 | Cursor | `/dev.feature` | A | Preview | [docs/runtimes/cursor.md](docs/runtimes/cursor.md) |
 | **Antigravity** | `/dev.feature` | A | Preview | [docs/runtimes/antigravity.md](docs/runtimes/antigravity.md) |

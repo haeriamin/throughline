@@ -20,6 +20,7 @@ by hand-porting. Tiers describe how much the tool can *enforce* (see
 | Tool | Tier | Status |
 |------|------|--------|
 | GitHub Copilot | A (enforced) | **Supported** |
+| GitHub Copilot CLI | A (enforced) | Preview — reuses the `.github/` surface; `preToolUse` guard enforcement advisory until verified (`docs/runtimes/copilot-cli.md`) |
 | Claude Code | A (enforced) | **Supported** |
 | Codex | A (enforced) | Preview — one delegation behaviour to verify (`.codex/VERIFICATION.md`) |
 | Cursor | A (enforced) | Preview — hooks ship fail-open until verified (`.cursor/VERIFICATION.md`) |

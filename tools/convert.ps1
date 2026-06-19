@@ -403,6 +403,34 @@ function Emit-Hooks($prof, $hooks) {
         }
         Write-Generated $path (($lines -join "`n").TrimEnd() + "`n")
     }
+    elseif ($fmt -eq "copilot-cli-json") {
+        # GitHub Copilot CLI reads .github/hooks/*.json (version 1). PascalCase event names select the
+        # VS Code-compatible payload (tool_name/tool_input) the shared guard scripts already parse; each
+        # entry carries both bash + powershell so one file works on every OS. NOTE: on the CLI a preToolUse
+        # exit code 2 is a non-blocking warning, so guard ENFORCEMENT is advisory until verified -- see
+        # docs/runtimes/copilot-cli.md.
+        $preAll = @($hooks | Where-Object { $_.phase -eq "pre" })
+        $post   = @($hooks | Where-Object { $_.phase -eq "post" })
+        $lines = @("{", '  "version": 1,', '  "_generated": "by tools/convert from .throughline/adapters/source/hook-spec.tsv; .github/hooks/*.json for GitHub Copilot CLI. PascalCase events use the VS Code-compatible tool_name/tool_input payload. preToolUse enforcement on the CLI is advisory until verified -- see docs/runtimes/copilot-cli.md.",', '  "hooks": {')
+        $lines += '    "PreToolUse": ['
+        for ($i = 0; $i -lt $preAll.Count; $i++) {
+            $h = $preAll[$i]
+            $matcher = if ($h.kind -eq "shell") { "Bash" } else { "Edit|Write|Create" }
+            $sep = if ($i -lt $preAll.Count - 1) { "," } else { "" }
+            $lines += "      { `"type`": `"command`", `"matcher`": `"$matcher`", `"bash`": `"bash $base/$($h.script).sh`", `"powershell`": `"powershell -NoProfile -ExecutionPolicy Bypass -File $base/$($h.script).ps1`", `"timeoutSec`": $($h.timeout) }$sep"
+        }
+        $lines += '    ],'
+        $lines += '    "PostToolUse": ['
+        for ($i = 0; $i -lt $post.Count; $i++) {
+            $h = $post[$i]
+            $sep = if ($i -lt $post.Count - 1) { "," } else { "" }
+            $lines += "      { `"type`": `"command`", `"matcher`": `"Edit|Write|Create`", `"bash`": `"bash $base/$($h.script).sh`", `"powershell`": `"powershell -NoProfile -ExecutionPolicy Bypass -File $base/$($h.script).ps1`", `"timeoutSec`": $($h.timeout) }$sep"
+        }
+        $lines += '    ]'
+        $lines += "  }"
+        $lines += "}"
+        Write-Generated $path ($lines -join "`n")
+    }
     else { throw "Unknown hook_format: $fmt" }
 }
 
