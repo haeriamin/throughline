@@ -411,11 +411,22 @@ function Emit-Hooks($prof, $hooks) {
         # docs/runtimes/copilot-cli.md.
         $preAll = @($hooks | Where-Object { $_.phase -eq "pre" })
         $post   = @($hooks | Where-Object { $_.phase -eq "post" })
-        $lines = @("{", '  "version": 1,', '  "_generated": "by tools/convert from .throughline/adapters/source/hook-spec.tsv; .github/hooks/*.json for GitHub Copilot CLI. PascalCase events use the VS Code-compatible tool_name/tool_input payload. preToolUse enforcement on the CLI is advisory until verified -- see docs/runtimes/copilot-cli.md.",', '  "hooks": {')
+        $lines = @("{", '  "version": 1,', '  "_generated": "by tools/convert from .throughline/adapters/source/hook-spec.tsv; .github/hooks/*.json for GitHub Copilot CLI. PascalCase events use the VS Code-compatible tool_name/tool_input payload. Guards run on both PreToolUse (advisory: a CLI preToolUse exit 2 is a warning) and PermissionRequest (enforcing: exit 2 denies) -- see docs/runtimes/copilot-cli.md.",', '  "hooks": {')
         $lines += '    "PreToolUse": ['
         for ($i = 0; $i -lt $preAll.Count; $i++) {
             $h = $preAll[$i]
-            $matcher = if ($h.kind -eq "shell") { "Bash" } else { "Edit|Write|Create" }
+            $matcher = if ($h.kind -eq "shell") { "Bash" } else { "Edit|Write" }
+            $sep = if ($i -lt $preAll.Count - 1) { "," } else { "" }
+            $lines += "      { `"type`": `"command`", `"matcher`": `"$matcher`", `"bash`": `"bash $base/$($h.script).sh`", `"powershell`": `"powershell -NoProfile -ExecutionPolicy Bypass -File $base/$($h.script).ps1`", `"timeoutSec`": $($h.timeout) }$sep"
+        }
+        $lines += '    ],'
+        # PermissionRequest fires before the CLI permission flow; a command-hook exit 2 = DENY there,
+        # so the same guard scripts that only WARN on PreToolUse actually block on the CLI. Non-violations
+        # exit 0 and fall through. (PermissionRequest does not fire on cloud agent.)
+        $lines += '    "PermissionRequest": ['
+        for ($i = 0; $i -lt $preAll.Count; $i++) {
+            $h = $preAll[$i]
+            $matcher = if ($h.kind -eq "shell") { "Bash" } else { "Edit|Write" }
             $sep = if ($i -lt $preAll.Count - 1) { "," } else { "" }
             $lines += "      { `"type`": `"command`", `"matcher`": `"$matcher`", `"bash`": `"bash $base/$($h.script).sh`", `"powershell`": `"powershell -NoProfile -ExecutionPolicy Bypass -File $base/$($h.script).ps1`", `"timeoutSec`": $($h.timeout) }$sep"
         }
@@ -424,7 +435,7 @@ function Emit-Hooks($prof, $hooks) {
         for ($i = 0; $i -lt $post.Count; $i++) {
             $h = $post[$i]
             $sep = if ($i -lt $post.Count - 1) { "," } else { "" }
-            $lines += "      { `"type`": `"command`", `"matcher`": `"Edit|Write|Create`", `"bash`": `"bash $base/$($h.script).sh`", `"powershell`": `"powershell -NoProfile -ExecutionPolicy Bypass -File $base/$($h.script).ps1`", `"timeoutSec`": $($h.timeout) }$sep"
+            $lines += "      { `"type`": `"command`", `"matcher`": `"Edit|Write`", `"bash`": `"bash $base/$($h.script).sh`", `"powershell`": `"powershell -NoProfile -ExecutionPolicy Bypass -File $base/$($h.script).ps1`", `"timeoutSec`": $($h.timeout) }$sep"
         }
         $lines += '    ]'
         $lines += "  }"

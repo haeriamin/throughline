@@ -343,14 +343,25 @@ emit_hooks() {
     {
       printf '%s\n' "{"
       printf '%s\n' '  "version": 1,'
-      printf '%s\n' '  "_generated": "by tools/convert from .throughline/adapters/source/hook-spec.tsv; .github/hooks/*.json for GitHub Copilot CLI. PascalCase events use the VS Code-compatible tool_name/tool_input payload. preToolUse enforcement on the CLI is advisory until verified -- see docs/runtimes/copilot-cli.md.",'
+      printf '%s\n' '  "_generated": "by tools/convert from .throughline/adapters/source/hook-spec.tsv; .github/hooks/*.json for GitHub Copilot CLI. PascalCase events use the VS Code-compatible tool_name/tool_input payload. Guards run on both PreToolUse (advisory: a CLI preToolUse exit 2 is a warning) and PermissionRequest (enforcing: exit 2 denies) -- see docs/runtimes/copilot-cli.md.",'
       printf '%s\n' '  "hooks": {'
       printf '%s\n' '    "PreToolUse": ['
       local pre=(); for i in "${!ids[@]}"; do [ "${phases[$i]}" = pre ] && pre+=("$i"); done
       local n=${#pre[@]} j i matcher sep
       for ((j=0;j<n;j++)); do
         i=${pre[$j]}
-        if [ "${kinds[$i]}" = shell ]; then matcher="Bash"; else matcher="Edit|Write|Create"; fi
+        if [ "${kinds[$i]}" = shell ]; then matcher="Bash"; else matcher="Edit|Write"; fi
+        sep=","; [ $j -eq $((n-1)) ] && sep=""
+        printf '      { "type": "command", "matcher": "%s", "bash": "bash %s/%s.sh", "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File %s/%s.ps1", "timeoutSec": %s }%s\n' "$matcher" "$base" "${scripts[$i]}" "$base" "${scripts[$i]}" "${timeouts[$i]}" "$sep"
+      done
+      printf '%s\n' '    ],'
+      # PermissionRequest fires before the CLI permission flow; a command-hook exit 2 = DENY there,
+      # so the same guard scripts that only WARN on PreToolUse actually block on the CLI. Non-violations
+      # exit 0 and fall through. (PermissionRequest does not fire on cloud agent.)
+      printf '%s\n' '    "PermissionRequest": ['
+      for ((j=0;j<n;j++)); do
+        i=${pre[$j]}
+        if [ "${kinds[$i]}" = shell ]; then matcher="Bash"; else matcher="Edit|Write"; fi
         sep=","; [ $j -eq $((n-1)) ] && sep=""
         printf '      { "type": "command", "matcher": "%s", "bash": "bash %s/%s.sh", "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File %s/%s.ps1", "timeoutSec": %s }%s\n' "$matcher" "$base" "${scripts[$i]}" "$base" "${scripts[$i]}" "${timeouts[$i]}" "$sep"
       done
@@ -360,7 +371,7 @@ emit_hooks() {
       n=${#po[@]}
       for ((j=0;j<n;j++)); do
         i=${po[$j]}; sep=","; [ $j -eq $((n-1)) ] && sep=""
-        printf '      { "type": "command", "matcher": "Edit|Write|Create", "bash": "bash %s/%s.sh", "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File %s/%s.ps1", "timeoutSec": %s }%s\n' "$base" "${scripts[$i]}" "$base" "${scripts[$i]}" "${timeouts[$i]}" "$sep"
+        printf '      { "type": "command", "matcher": "Edit|Write", "bash": "bash %s/%s.sh", "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File %s/%s.ps1", "timeoutSec": %s }%s\n' "$base" "${scripts[$i]}" "$base" "${scripts[$i]}" "${timeouts[$i]}" "$sep"
       done
       printf '    ]\n'
       printf '  }\n'

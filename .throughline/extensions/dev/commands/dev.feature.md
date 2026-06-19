@@ -19,6 +19,14 @@ in, a reviewed, merge-ready branch out.
 - `--micro` — collapsed lane for genuinely small changes (see below).
 - `--audit` — run `/dev.audit` after completion.
 
+**Default autonomy.** A plain `/dev.feature` (no flags) runs the whole pipeline autonomously
+**except** the constitutional human pauses listed below — it still stops at the spec gate (step 3)
+and plan gate (step 6) for an approve/reject. `--express` drops *only those two* gates (LOW/MEDIUM
+only); it never drops clarification, HIGH/greenfield design approval, CRITICAL hand-over,
+escalations, or the merge. So "one request in, merge-ready branch out" means *unattended between
+gates*, not *zero checkpoints*. For a single hands-off run on a small change, combine `--express`
+(or `--micro`) with a description detailed enough to pre-answer the gates.
+
 ## Choosing a lane (ceremony should match risk)
 
 The full pipeline is overkill for a one-line fix and essential for a payments change.
@@ -26,15 +34,15 @@ After bootstrap + analysis, the Orchestrator picks — or the user forces — a 
 
 | Lane | When | Pipeline |
 |------|------|----------|
-| **micro** | Analysis class LOW, single file, no public contract/schema/security surface, no new dependency. Forced with `--micro`; auto-offered when criteria met. | Tiny inline spec (one paragraph in the work item, not a `specs/` folder) → `/dev.implement` → `/dev.test` → `/dev.review`. Skips clarify/plan/design/tasks. |
+| **micro** | Analysis class LOW, single file, no *breaking* contract/schema/security surface (a small additive export is fine), no new dependency. Forced with `--micro`; auto-offered when criteria met. | Tiny inline spec (one paragraph in the work item, not a `specs/` folder) → `/dev.implement` → `/dev.test` → `/dev.review`. Skips clarify/plan/design/tasks. |
 | **standard** | Default. LOW/MEDIUM. | The full pipeline below, gates per `--express`. |
 | **deep** | HIGH (design) or CRITICAL (human-led). | Full pipeline; design mandatory; CRITICAL stops for human lead. |
 
 micro still produces a cited Decision Record, real test evidence, an independent review,
 and a `sdd/<slice>` branch — it drops the *planning paperwork*, never the *gates or the
-audit trail*. If a micro slice turns out to touch a contract or security surface mid-flight,
-the Orchestrator aborts micro and restarts it in the standard lane. `--micro` is refused
-for anything analysis classes MEDIUM or above.
+audit trail*. If a micro slice turns out to make a breaking contract change or touch a
+security surface mid-flight, the Orchestrator aborts micro and restarts it in the standard
+lane. `--micro` is refused for anything analysis classes MEDIUM or above.
 
 ## Preconditions
 
@@ -63,8 +71,13 @@ ways: design becomes mandatory (step 5) and scaffold runs before implementation 
 ## Pipeline
 
 0. **Bootstrap** (Principle II — full sequence). Create the work item in
-   `work-queue/pending/` (status: PENDING), then move to `in-progress/` as phases start.
-1. **Specify** — `/throughline.specify "<description> (target: <id>)"`.
+   `work-queue/pending/` from `.throughline/templates/work-item-template.md` (status: PENDING),
+   then move to `in-progress/` as phases start.
+1. **Specify** — `/throughline.specify "<description> (target: <id>)"`. Allocate the slice
+   number as **max(existing `specs/NNN-*` and `work-queue/**/NNN-*`) + 1**, zero-padded — scan
+   both `specs/` and every `work-queue/` lane so a concurrent in-progress slice can't grab the
+   same `NNN` (the parallelism cap allows up to 3). If the chosen `specs/NNN-*` already exists,
+   bump and retry.
 2. **Clarify** — `[NEEDS CLARIFICATION]` markers present → `/throughline.clarify` and **wait
    for the user's answers**. Constitutional; `--express` cannot skip it.
 3. **Spec gate** *(skipped by `--express`)* — present a 5-line spec summary
@@ -89,9 +102,11 @@ ways: design becomes mandatory (step 5) and scaffold runs before implementation 
     `<target>/.throughline/CHANGELOG.md` (created by `/dev.implement`): set `Status` to the
     terminal verdict (`PASS` / `CONDITIONAL_PASS` / `FAIL`, with confidence) and add the merge
     note. On a clean FAIL after retries, record `FAIL — escalated`. **Commit this update onto the
-    `sdd/<slice>` branch** (e.g. `git -C <target> commit -am "throughline: <slice> <verdict>"`) so
-    the stamped verdict travels with the branch into the human's merge — an uncommitted stamp would
-    be lost and the merged record would read `PENDING REVIEW`. This is a target write on the slice
+    `sdd/<slice>` branch.** Stage new **and** modified files first — the `.throughline/CHANGELOG.md`
+    and `README.md` created during the slice are untracked, so `commit -am` would silently drop
+    them: `git -C <target> add -A && git -C <target> commit -m "throughline: <slice> <verdict>"`.
+    The stamped verdict then travels with the branch into the human's merge — an uncommitted stamp
+    would be lost and the merged record would read `PENDING REVIEW`. This is a target write on the slice
     branch; it is lifecycle bookkeeping, so the Orchestrator owns it (the Reviewer stays read-only
     on the target). Never push or merge. Skip if the target sets `changelog: off`.
 12. **Final report** (single message):

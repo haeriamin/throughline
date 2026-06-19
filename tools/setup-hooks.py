@@ -22,6 +22,7 @@ Use this Python script only if you prefer it:
   Windows:      py tools\\setup-hooks.py
   macOS/Linux:  python3 tools/setup-hooks.py
 """
+
 import json
 import os
 import platform
@@ -55,7 +56,9 @@ def codex_command(basename):
 def block(matcher, *basenames, cmd):
     return {
         "matcher": matcher,
-        "hooks": [{"type": "command", "command": cmd(b), "timeout": t} for b, t in basenames],
+        "hooks": [
+            {"type": "command", "command": cmd(b), "timeout": t} for b, t in basenames
+        ],
     }
 
 
@@ -64,19 +67,39 @@ def claude_hooks():
         "PreToolUse": [
             {
                 "matcher": "Write|Edit|MultiEdit|NotebookEdit",
-                "hooks": [{"type": "command", "command": claude_command("validate-immutable-paths"), "timeout": 10}],
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": claude_command("validate-immutable-paths"),
+                        "timeout": 10,
+                    }
+                ],
             },
             {
                 "matcher": "Bash",
-                "hooks": [{"type": "command", "command": claude_command("validate-bash-safety"), "timeout": 10}],
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": claude_command("validate-bash-safety"),
+                        "timeout": 10,
+                    }
+                ],
             },
         ],
         "PostToolUse": [
             {
                 "matcher": "Write|Edit|MultiEdit",
                 "hooks": [
-                    {"type": "command", "command": claude_command("log-tool-use"), "timeout": 15},
-                    {"type": "command", "command": claude_command("check-code-quality"), "timeout": 30},
+                    {
+                        "type": "command",
+                        "command": claude_command("log-tool-use"),
+                        "timeout": 15,
+                    },
+                    {
+                        "type": "command",
+                        "command": claude_command("check-code-quality"),
+                        "timeout": 30,
+                    },
                 ],
             }
         ],
@@ -97,23 +120,43 @@ def codex_hooks_json():
             "PreToolUse": [
                 {
                     "matcher": "apply_patch|Edit|Write",
-                    "hooks": [{"type": "command", "command": codex_command("validate-immutable-paths"), "timeout": 10,
-                               "statusMessage": "Guarding /standards/ + /exemplars/ (read-only)"}],
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": codex_command("validate-immutable-paths"),
+                            "timeout": 10,
+                            "statusMessage": "Guarding /standards/ + /exemplars/ (read-only)",
+                        }
+                    ],
                 },
                 {
                     "matcher": "Bash",
-                    "hooks": [{"type": "command", "command": codex_command("validate-bash-safety"), "timeout": 10,
-                               "statusMessage": "Blocking writes to immutable paths + git push/merge (human-only)"}],
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": codex_command("validate-bash-safety"),
+                            "timeout": 10,
+                            "statusMessage": "Blocking writes to immutable paths + git push/merge (human-only)",
+                        }
+                    ],
                 },
             ],
             "PostToolUse": [
                 {
                     "matcher": "apply_patch|Edit|Write",
                     "hooks": [
-                        {"type": "command", "command": codex_command("log-tool-use"), "timeout": 15,
-                         "statusMessage": "Appending to wiki/log.md"},
-                        {"type": "command", "command": codex_command("check-code-quality"), "timeout": 30,
-                         "statusMessage": "Quality lint on written files"},
+                        {
+                            "type": "command",
+                            "command": codex_command("log-tool-use"),
+                            "timeout": 15,
+                            "statusMessage": "Appending to wiki/log.md",
+                        },
+                        {
+                            "type": "command",
+                            "command": codex_command("check-code-quality"),
+                            "timeout": 30,
+                            "statusMessage": "Quality lint on written files",
+                        },
                     ],
                 },
             ],
@@ -136,7 +179,9 @@ def wire_cursor(root):
     guard-script hiccup never locks the session; flip to true once .cursor/VERIFICATION.md passes.
     """
     cursor_dir = os.path.join(root, ".cursor")
-    template = os.path.join(root, ".throughline", "adapters", "generated", "cursor", "hooks.template.json")
+    template = os.path.join(
+        root, ".throughline", "adapters", "generated", "cursor", "hooks.template.json"
+    )
     if not (os.path.isdir(cursor_dir) and os.path.exists(template)):
         return None
     with open(template, encoding="utf-8") as f:
@@ -153,16 +198,20 @@ def wire_cursor(root):
 def wire_kimi(root):
     """Install .kimi/config.toml from the staged Kimi hooks template."""
     kimi_dir = os.path.join(root, ".kimi")
-    template = os.path.join(root, ".throughline", "adapters", "generated", "kimi", "hooks.template.toml")
+    template = os.path.join(
+        root, ".throughline", "adapters", "generated", "kimi", "hooks.template.toml"
+    )
     agents_md = os.path.join(kimi_dir, "AGENTS.md")
     if not (os.path.exists(agents_md) and os.path.exists(template)):
         return None
     with open(template, encoding="utf-8") as f:
         raw = f.read()
+
     def repl(m):
         script = m.group(1)
         cmd = cursor_command(f".github/hooks/scripts/{script}.sh")
         return f'command = "{cmd}"'
+
     raw = re.sub(
         r'command = "\.github/hooks/scripts/([A-Za-z0-9._-]+)\.sh"',
         repl,
@@ -180,7 +229,14 @@ def wire_kimi(root):
 def wire_antigravity(root):
     """Install .agents/hooks.json from the staged Antigravity template."""
     agents_dir = os.path.join(root, ".agents")
-    template = os.path.join(root, ".throughline", "adapters", "generated", "antigravity", "hooks.template.json")
+    template = os.path.join(
+        root,
+        ".throughline",
+        "adapters",
+        "generated",
+        "antigravity",
+        "hooks.template.json",
+    )
     gemini = os.path.join(root, "GEMINI.md")
     if not (os.path.exists(gemini) and os.path.exists(template)):
         return None
@@ -203,7 +259,9 @@ def write_json(path, data):
 
 
 def main():
-    guard = os.path.join(ROOT, ".github", "hooks", "scripts", "validate-immutable-paths.sh")
+    guard = os.path.join(
+        ROOT, ".github", "hooks", "scripts", "validate-immutable-paths.sh"
+    )
     if not os.path.exists(guard):
         print(
             "ERROR: Hook scripts not found. Run `tools/install` or "
@@ -238,17 +296,33 @@ def main():
 
     launcher_kind = "powershell + .ps1" if IS_WINDOWS else "bash + .sh"
     print(f"Throughline hooks wired for {os_name} ({launcher_kind}).")
-    print(f"  Claude Code: {os.path.relpath(claude_local, ROOT)} (machine-local, gitignored)")
+    print(
+        f"  Claude Code: {os.path.relpath(claude_local, ROOT)} (machine-local, gitignored)"
+    )
     if os.path.isdir(os.path.dirname(codex_path)):
         print(f"  Codex:       {os.path.relpath(codex_path, ROOT)}")
     if cursor_out:
-        print(f"  Cursor:      {os.path.relpath(cursor_out, ROOT)} (fail-open until .cursor/VERIFICATION.md passes)")
+        print(
+            f"  Cursor:      {os.path.relpath(cursor_out, ROOT)} (fail-open until .cursor/VERIFICATION.md passes)"
+        )
     if antigravity_out:
-        print(f"  Antigravity: {os.path.relpath(antigravity_out, ROOT)} (best-effort matchers until .agents/VERIFICATION.md passes)")
+        print(
+            f"  Antigravity: {os.path.relpath(antigravity_out, ROOT)} (best-effort matchers until .agents/VERIFICATION.md passes)"
+        )
     if kimi_out:
-        print(f"  Kimi Code:   {os.path.relpath(kimi_out, ROOT)} (best-effort matchers until .kimi/VERIFICATION.md passes)")
-    print("  Copilot:     .github/hooks/hooks.json already carries a per-OS `windows` override; no action needed.")
-    print("  Read-only guard on /standards/ + /exemplars/ is declarative in .claude/settings.json and always on.")
+        print(
+            f"  Kimi Code:   {os.path.relpath(kimi_out, ROOT)} (best-effort matchers until .kimi/VERIFICATION.md passes)"
+        )
+    print(
+        "  Copilot:     .github/hooks/hooks.json already carries a per-OS `windows` override; no action needed."
+    )
+    if os.path.exists(os.path.join(ROOT, ".github", "hooks", "copilot-cli.json")):
+        print(
+            "  Copilot CLI: .github/hooks/copilot-cli.json (cross-OS; no per-OS wiring needed)"
+        )
+    print(
+        "  Read-only guard on /standards/ + /exemplars/ is declarative in .claude/settings.json and always on."
+    )
     return 0
 
 

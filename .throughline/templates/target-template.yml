@@ -1,7 +1,7 @@
 # Target registry entry — one file per external project.
 # Created/maintained ONLY via /dev.target (Orchestrator). Humans may edit.
 id: my-app                        # unique kebab-case id; filename must be <id>.yml
-path: "path/to/my-app"            # ABSOLUTE path to the external project root
+path: "C:/Repos/my-app"           # ABSOLUTE path; use forward slashes even on Windows (never backslashes — YAML reads "\t" etc. as escapes)
 vcs: git                          # git | none  (none → Principle VI backups apply)
 default_branch: main
 stack: []                         # e.g., [node, typescript, react]

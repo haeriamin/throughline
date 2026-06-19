@@ -3,7 +3,7 @@ description: Portfolio-wide quality roll-up across targets; systemic patterns, e
 handoffs:
   - label: Hand recommendations to Archivist
     agent: dev.ingest-exemplars
-    prompt: Audit recommends new exemplars (see recommendations file). Re-ingest once humans curate them.
+    prompt: Audit recommends exemplars (see the recommendations file). Curate any genuinely new ones, then re-ingest with /dev.ingest-exemplars — exemplars already on disk just need ingesting, not curation.
 ---
 
 <!-- Extension: dev | Persona: Auditor -->

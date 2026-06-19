@@ -1,7 +1,7 @@
 # /dev.target
 
 **Agent**: Orchestrator
-**Reads**: target path (external), `targets/**`, `.claude/settings.json`, `.throughline/integrations/*.manifest.json`
+**Reads**: target path (external), `targets/**`, `.claude/settings.local.json`, installed-adapter footprints (`.claude/`, `.codex/`, `.cursor/`, `.agents/`, `.kimi/`, `.opencode/`, `.qwen/`, `.github/`, `AGENTS.md`), `.throughline/integrations/*.manifest.json`
 **Writes**: `targets/<id>.yml`, `targets/<id>.code-workspace`, per-tool access config (see step 7); append to `wiki/log.md`
 **Never writes**: `/standards/**`, `/exemplars/**`, target source files
 
@@ -24,17 +24,20 @@
 4. **Probe** the project (read-only):
    - VCS: `.git/` present → `vcs: git`, detect default branch; else `vcs: none`.
    - Stack: detect from manifests (`package.json`, `pyproject.toml`, `*.csproj`, `go.mod`, `Cargo.toml`, …).
-   - Commands: detect `test_command` / `lint_command` / `build_command` from manifest scripts; leave empty if ambiguous (do NOT guess).
+   - Commands: detect `test_command` / `lint_command` / `build_command`. For npm-style stacks read `package.json` `scripts`; for other stacks read the conventional config — Python: `pyproject.toml`/`tox.ini`/`setup.cfg` (e.g. `pytest`, `ruff`, `tox`); Go: `go test`/`go build`; Rust: `cargo test`/`cargo build`; etc. Leave a field empty if genuinely ambiguous (do NOT guess).
+   - **Flag configured-but-unwired tooling**: if the project configures a linter/formatter/SAST (e.g. `ruff`/`eslint`/`pre-commit`) you could not unambiguously map to `lint_command`, record it in `conventions` and note that tool-backed standards (ENG-03, DEL-02) degrade to manual judgement until a human sets `lint_command`. Never leave an available tool silently invisible.
 5. Write `targets/<id>.yml` from `.throughline/templates/target-template.yml` with probed values.
 6. Generate `targets/<id>.code-workspace`:
    ```json
    { "folders": [ { "name": "framework", "path": ".." },
                   { "name": "<id>", "path": "<absolute-target-path>" } ] }
    ```
-7. **Grant target access for each installed tool.** A tool is "installed" when its adapter manifest exists (`.throughline/integrations/<tool>.manifest.json`, written by `tools/convert`). The target path is outside this repo, so each tool needs to be told it may read and write there. Apply only the entries for tools that are installed; report every change.
-   - **Claude Code** (`claude.manifest.json`): add the absolute target path to `permissions.additionalDirectories` in `.claude/settings.local.json` (create the file with a `permissions` key if absent; merge, don't overwrite). Gitignored — machine paths never land in the shared `settings.json`.
-   - **Cursor, Copilot, and any VS Code-based tool**: access comes from the multi-root workspace generated in step 6 — `targets/<id>.code-workspace` already lists the target folder. Tell the human to open that workspace. No per-path permission file is written.
-   - **Codex** (`codex.manifest.json`): Codex sandboxes writes to the workspace root. Add the absolute target path as a writable root in the user's Codex config (`~/.codex/config.toml` → `[sandbox_workspace_write] writable_roots`), or launch Codex with the target as an extra `--cd` root. This is user-level machine config; print the exact line to add rather than editing it silently.
+7. **Grant target access for each installed tool.** A tool is "installed" when its adapter footprint exists — its manifest (`.throughline/integrations/<tool>.manifest.json`) **or** its generated adapter config (several profiles deliberately emit no manifest, so never rely on the manifest alone): Claude → `.claude/`; Codex → `.codex/` + `AGENTS.md`; Copilot (VS Code) → `.github/copilot-instructions.md`; Copilot CLI → `.github/hooks/copilot-cli.json` + `AGENTS.md`; Cursor → `.cursor/`; Antigravity → `.agents/` + `GEMINI.md`; Kimi → `.kimi/`; OpenCode → `.opencode/` + `opencode.json`; Qwen → `.qwen/` + `QWEN.md`; Aider/Windsurf → their rules bundle. The target path is outside this repo, so each installed tool must be told it may read and write there. Apply only the entries for installed tools; report every change (and explicitly report any tool detected but left unwired).
+   - **Claude Code**: add the absolute target path to `permissions.additionalDirectories` in `.claude/settings.local.json` (create with a `permissions` key if absent; merge, don't overwrite). Gitignored — machine paths never land in the shared `settings.json`.
+   - **Codex**: Codex sandboxes writes to the workspace root. Add the absolute target path as a writable root in the user's Codex config (`~/.codex/config.toml` → `[sandbox_workspace_write] writable_roots`), or launch Codex with the target as an extra `--cd` root. User-level machine config — print the exact line to add rather than editing it silently.
+   - **VS Code-based tools (Copilot in VS Code, Cursor)**: access comes from the multi-root workspace generated in step 6 — `targets/<id>.code-workspace` already lists the target folder. Tell the human to open that workspace. No per-path file is written.
+   - **GitHub Copilot CLI**: the CLI reads/writes within the session's trusted directories, and the framework brain (`.github/`, `AGENTS.md`) lives in THIS repo. Tell the human to launch `copilot` from the framework repo root (so it loads the instructions + agents) and add the external target as a trusted/working directory for the session. No per-path file is written here; see `docs/runtimes/copilot-cli.md`.
+   - **Antigravity, Kimi, OpenCode, Qwen**: these operate on the folder/workspace the human opens. Point the human at `targets/<id>.code-workspace` (or the tool's open-folder flow); if the tool documents a writable-roots/trusted-dir setting, print the exact line to add and reference the tool's `.<tool>/VERIFICATION.md`. No per-path file is written unless the tool documents one.
    - **Tier B tools (Aider, Windsurf)**: no access model to wire — they operate on whatever folder the human opens. Note this in the report.
 8. Append to `wiki/log.md` (record which tools were granted access).
 

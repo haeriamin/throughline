@@ -13,6 +13,7 @@ Format: `| ISO-8601 timestamp | agent | command | target | verdict | summary | a
 | 2026-06-13T00:00:02Z | human | throughline.constitution | - | - | Amendment 0.2.0 (MINOR): new Output Language section — all artifacts written for people must use plain, simple English; Reviewer enforces as a structural check | .throughline/memory/constitution.md |
 | 2026-06-15T00:00:00Z | human | edit-standard | STD-004 | - | Added TST-07 (cover the spec's negative space: one test per reject/raise rule) and TST-08 (expected values come from the spec, not the code), grounded in the spec-derived-testing research track | standards/testing-standards.md |
 | 2026-06-15T00:00:05Z | Archivist | dev.ingest-standards | - | - | Re-ingested STD-004: 29 rules total (16 BLOCKING, 9 WARNING, 4 INFO) across STD-001..005 | wiki/standards-summary.md |
+| 2026-06-19T03:00:00Z | Archivist | dev.ingest-exemplars | - | - | Re-ingested all 3 exemplars; added PAT-003 (Spec-Grounded Input Validation) from exemplars/good/python/validated-operation.py; refreshed Sources and inventory (3 exemplars, 3 pattern classes, PAT-001..003); cleared the stale "2 exemplars / gaps: none". Standard Basis ENG-01/02/06 + TST-07/08 resolve in standards-summary. | wiki/pattern-library.md |
 
 <!-- A validation run (greenfield + feature slices on an external demo target) was executed
      and its full audit trail is preserved under docs/validation-runs/. Those operational

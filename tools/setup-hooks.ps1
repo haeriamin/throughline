@@ -88,6 +88,7 @@ Write-Host "Throughline hooks wired for Windows (powershell + .ps1)."
 Write-Host "  Claude Code: .claude/settings.local.json (machine-local, gitignored)"
 Write-Host "  Codex:       .codex/hooks.json"
 Write-Host "  Copilot:     .github/hooks/hooks.json already has a per-OS override; no action needed."
+if (Test-Path (Join-Path $root ".github\hooks\copilot-cli.json")) { Write-Host "  Copilot CLI: .github/hooks/copilot-cli.json (cross-OS; no per-OS wiring needed)" }
 if (Test-Path $cursorDir) { Write-Host "  Cursor:      .cursor/hooks.json (fail-open until .cursor/VERIFICATION.md passes)" }
 if (Test-Path (Join-Path $agentsDir "hooks.json")) { Write-Host "  Antigravity: .agents/hooks.json (best-effort matchers until .agents/VERIFICATION.md passes)" }
 

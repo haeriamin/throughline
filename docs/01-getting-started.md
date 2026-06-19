@@ -40,6 +40,7 @@ Tools spell commands differently — same commands, same behavior:
 |------|--------|
 | Claude Code | `/dev:analyze`, `/throughline:specify` |
 | Copilot, Codex, Cursor | `/dev.analyze`, `/throughline` |
+| Copilot CLI | no slash commands — drive the lifecycle by asking for the agent (e.g. “use the dev.feature agent”) |
 | Aider, Windsurf | no slash commands — adopt personas from the rules bundle |
 
 Docs default to the Claude Code colon form. The mapping is mechanical. Full per-host walkthroughs:

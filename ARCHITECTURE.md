@@ -477,10 +477,16 @@ The wiki is shared across all registered targets **by design** — that is the k
 
 | Class | Criteria | Handling |
 |-------|----------|----------|
-| LOW | Single module, no schema/API contract change, no security surface | Fully autonomous |
+| LOW | Single module; no *breaking* contract change (a new/additive public symbol, export, or endpoint that leaves existing contracts intact is fine); no security surface | Fully autonomous |
 | MEDIUM | 2–5 modules, internal API changes, standard patterns matched | Autonomous + CONDITIONAL review |
-| HIGH | Cross-cutting, public API/schema change, new dependency, concurrency | `/dev.design` required; human-approved plan |
+| HIGH | Cross-cutting; *breaking* public API/schema change (altering or removing an existing contract); new dependency; concurrency | `/dev.design` required; human-approved plan |
 | CRITICAL | Auth/payments/PII, data migrations, prod infra | Human-led, agent-assisted only |
+
+**Additive vs. breaking.** Classify by *contract compatibility*, not by whether a public symbol is
+touched. A backward-compatible addition (new function/class/export/endpoint, new optional field) does
+not by itself raise the class — otherwise every feature in a library, whose product *is* its public
+API, would be HIGH. Only a change that alters or removes an existing public contract (or breaks
+callers) is the "public API/schema change" that triggers HIGH.
 
 ### 12.2 Atomicity
 

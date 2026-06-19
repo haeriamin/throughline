@@ -73,6 +73,12 @@ Knowledge only: just step 3, then use the skills ad hoc in chat.
 - The slash syntax is the dot form: `/dev.analyze`, `/throughline`.
 - Use the generated `<id>.code-workspace`. Without it, Copilot can't reach the target's files.
 - Agents hand off to each other through the `handoffs:` declared in `.github/agents/*.agent.md`.
+- **Single-agent independence caveat**: by default one model invocation plays every persona, so the
+  Implementer and Reviewer are the same agent — the review gate is effectively self-grading, and a
+  high confidence (even 1.00) on a small slice reflects traceability discipline, not an independent
+  correctness guarantee. The human merge is the real gate; weight PASS/CONDITIONAL_PASS accordingly.
+  Delegating phases to separate Copilot subagents narrows this (the Reviewer runs as its own agent)
+  but doesn't erase it — they still share a model family.
 - The [dashboard extension](../07-dashboard.md) gives you a live view of the work queue.
 
 Next: [Building Features](../04-building-features.md) · [Quality Gates](../06-quality-gates.md)

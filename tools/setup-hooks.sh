@@ -108,17 +108,10 @@ fi
 kimi_dir="$ROOT/.kimi"
 kimi_template="$ROOT/.throughline/adapters/generated/kimi/hooks.template.toml"
 if [ -f "$kimi_dir/AGENTS.md" ] && [ -f "$kimi_template" ]; then
-  sed -E 's#"(\.github/hooks/scripts/[A-Za-z0-9._-]+\.sh)"#"bash \1"#g' "$kimi_template" > "$kimi_dir/config.toml"
-  echo "wrote $kimi_dir/config.toml (best-effort matchers until .kimi/VERIFICATION.md passes)"
-fi
-
-# Kimi Code: install .kimi/config.toml from the staged template, rewritten for bash.
-kimi_dir="$ROOT/.kimi"
-kimi_template="$ROOT/.throughline/adapters/generated/kimi/hooks.template.toml"
-if [ -f "$kimi_dir/AGENTS.md" ] && [ -f "$kimi_template" ]; then
   mkdir -p "$kimi_dir"
   sed -E 's#command = "\.github/hooks/scripts/([A-Za-z0-9._-]+)\.sh"#command = "bash .github/hooks/scripts/\1.sh"#g' "$kimi_template" > "$kimi_dir/config.toml"
   echo "wrote $kimi_dir/config.toml (best-effort matchers until .kimi/VERIFICATION.md passes)"
 fi
 
+[ -f "$ROOT/.github/hooks/copilot-cli.json" ] && echo "  Copilot CLI: .github/hooks/copilot-cli.json (cross-OS; no per-OS wiring needed)"
 echo "Throughline hooks wired for macOS/Linux (bash + .sh)."

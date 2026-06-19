@@ -19,7 +19,10 @@ Inside a slice, target and scope come from the active `spec.md`.
 
 ## Steps
 
-1. **Bootstrap** (Principle II — full sequence including target context).
+1. **Bootstrap** (Principle II — full sequence including target context). Bootstrap economy governs
+   *wiki* re-reads only — reading the target's own source to learn its real patterns is a separate,
+   expected cost this phase pays in full (it is exactly what the analysis report then captures so
+   later phases needn't repeat it).
 2. Run the `codebase-mapper` skill over the scope → module inventory JSON.
 3. For the slice requirements (or the whole scope in bulk mode):
    - Identify affected modules + dependency fan-out.

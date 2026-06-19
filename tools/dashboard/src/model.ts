@@ -115,9 +115,11 @@ function readFlatYaml(file: string): Record<string, string> {
       continue;
     }
     let value = m[2].trim();
-    if (value.startsWith('"')) {
-      // Quoted scalar: take content up to the closing quote (drops any trailing # comment).
-      const end = value.indexOf('"', 1);
+    if (value.startsWith('"') || value.startsWith("'")) {
+      // Quoted scalar (single or double): take content up to the matching closing
+      // quote (drops any trailing # comment).
+      const q = value[0];
+      const end = value.indexOf(q, 1);
       value = end >= 0 ? value.slice(1, end) : value.slice(1);
     } else {
       // Unquoted scalar: strip a trailing " # comment" (YAML comments start at whitespace + #).
