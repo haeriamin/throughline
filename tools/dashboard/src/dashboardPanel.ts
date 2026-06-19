@@ -4,7 +4,7 @@ import { FrameworkModel } from "./model";
 type Tone = "green" | "amber" | "red" | "blue" | "neutral";
 
 const ICONS = {
-  mark: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18 L12 12.5 L19 7"/><circle cx="5" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="7" r="2.4" fill="currentColor" stroke="none"/></svg>`,
+  mark: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 18.5 L11 13 L15.1 9.6"/><circle cx="4.5" cy="18.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="11" cy="13" r="1.4" fill="currentColor" stroke="none"/><circle cx="18" cy="7.5" r="3.4"/><path d="M16.4 7.7 L17.6 8.9 L19.9 6.2" stroke-width="1.5"/></svg>`,
   target: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>`,
   layers: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>`,
   alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4M12 17.5v.5"/></svg>`,
@@ -28,7 +28,7 @@ export class DashboardPanel {
   private readonly panel: vscode.WebviewPanel;
   private readonly disposables: vscode.Disposable[] = [];
 
-  static show(getModel: () => FrameworkModel | null): void {
+  static show(getModel: () => FrameworkModel | null, extensionUri: vscode.Uri): void {
     if (DashboardPanel.current) {
       DashboardPanel.current.panel.reveal();
       DashboardPanel.current.update(getModel());
@@ -37,6 +37,7 @@ export class DashboardPanel {
     const panel = vscode.window.createWebviewPanel("sddDashboard", "Throughline Dashboard", vscode.ViewColumn.One, {
       enableScripts: true,
     });
+    panel.iconPath = vscode.Uri.joinPath(extensionUri, "media", "icon-color.svg");
     DashboardPanel.current = new DashboardPanel(panel, getModel);
   }
 

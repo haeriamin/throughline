@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("sdd.refresh", refreshAll),
-    vscode.commands.registerCommand("sdd.openDashboard", () => DashboardPanel.show(resolveModel))
+    vscode.commands.registerCommand("sdd.openDashboard", () => DashboardPanel.show(resolveModel, context.extensionUri))
   );
 
   // Watch framework state dirs + each target's .throughline/ home; re-arm when the root changes.
