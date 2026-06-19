@@ -1,7 +1,7 @@
 # /dev.lint-wiki
 
 **Agent**: Archivist (read-only mode)
-**Reads**: `wiki/**`, `/standards/**`, `/exemplars/**`, `.github/skills/**`, `.claude/skills/**`, `work-queue/**`, `targets/**`, `specs/**`
+**Reads**: `wiki/**`, `/standards/**`, `/exemplars/**`, `.github/skills/**`, `.claude/skills/**`, `work-queue/**`, `targets/**` and each registered target's `<target>/.throughline/**` (its `wiki/`, `work-queue/`, `specs/`)
 **Writes**: stdout report; optional `wiki/_lint-report.md`; append to `wiki/log.md`
 **Never writes**: any other path
 
@@ -24,8 +24,9 @@
 6. **Log integrity**: `wiki/log.md` entries are chronologically ordered and parse
    (timestamp | agent | command | target | verdict | summary | artifacts). Each named
    artifact resolves on disk at its current location — report a dangling reference as INFO
-   (an append-only log legitimately names a path later moved, e.g. a work item that advanced
-   from `in-progress/` to `completed/`), not as an error.
+   (an append-only log legitimately names a path later moved, e.g. a live work item cleared
+   from the global `work-queue/in-progress/` once its durable record landed at
+   `<target>/.throughline/work-queue/completed/`), not as an error.
 7. **Skill parity (`.github` ↔ `.claude`)**: `.github/skills/<name>/SKILL.md` is byte-identical
    to `.claude/skills/<name>/SKILL.md` for every skill. Canonical source:
    `.throughline/adapters/source/skills/<name>/SKILL.md` — if parity fails, re-run `tools/convert`.
@@ -42,10 +43,16 @@
     ("un-ingested exemplar — re-run `/dev.ingest-exemplars`"); summary prose that contradicts
     disk (e.g. a literal "gaps: none" or an "N exemplars" count that disagrees with the file
     count) is a WARNING. This catches drift a bumped-but-not-re-ingested timestamp would hide.
-11. **Work-queue hygiene**: every phase report `work-queue/in-progress/<slice>-*.md` whose
-    work item has moved to `work-queue/completed/` or `escalated/` is flagged WARNING
-    ("stranded phase report — archive or move it with the slice"); every `in-progress/` work
-    item has a matching `specs/<slice>/` (or an inline micro-lane spec). No other command owns
+    The same inventory check runs per target against `<target>/.throughline/exemplars|standards`
+    and that target's delta wiki (`<target>/.throughline/wiki/`).
+11. **Work-queue hygiene** (spans the global live queue **and** each target's
+    `<target>/.throughline/`): every phase report under a target's
+    `<target>/.throughline/specs/NNN-*/` (`analysis.md`, `implementation.md`, `scaffold.md`)
+    whose slice's live work item has been cleared or moved to `completed/`/`escalated/` without
+    the report being finalized is flagged WARNING ("stranded phase report — archive or move it
+    with the slice"); every global `work-queue/in-progress/<id>.md` live item has a matching
+    `<target>/.throughline/specs/NNN-*/` (or an inline micro-lane spec); the durable done record
+    belongs at `<target>/.throughline/work-queue/completed/<slice>.md`. No other command owns
     work-queue hygiene.
 
 ## Steps

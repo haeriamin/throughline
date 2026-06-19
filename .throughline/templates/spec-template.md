@@ -6,6 +6,9 @@
 **Status**: Draft
 **Input**: "[verbatim user description]"
 
+> This spec lives at `<target>/.throughline/specs/[NNN-short-name]/spec.md`. Slice numbers are
+> per target — each target's `.throughline/specs/` starts at `001`.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### Primary User Story

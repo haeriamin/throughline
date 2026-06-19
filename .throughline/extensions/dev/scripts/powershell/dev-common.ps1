@@ -18,7 +18,8 @@ function Get-TargetEntry([Parameter(Mandatory = $true)][string]$TargetId) {
 }
 
 function Assert-WritablePath([Parameter(Mandatory = $true)][string]$Path) {
-    # Defense-in-depth mirror of the immutable-paths hook (Principle I).
+    # Defense-in-depth mirror of the immutable-paths hook (Principle I): framework org seeds
+    # AND each target's local .throughline/standards|exemplars overrides.
     $root = Get-RepoRoot
     $full = [System.IO.Path]::GetFullPath($Path)
     foreach ($immutable in @("standards", "exemplars")) {
@@ -27,24 +28,37 @@ function Assert-WritablePath([Parameter(Mandatory = $true)][string]$Path) {
             throw "BLOCKED: '$Path' is inside immutable directory /$immutable/ (Constitution Principle I)."
         }
     }
+    if (($full -replace '\\', '/') -match '/\.throughline/(standards|exemplars)/') {
+        throw "BLOCKED: '$Path' is inside a target's immutable .throughline/$($Matches[1])/ (Constitution Principle I)."
+    }
 }
 
 function Get-SliceBranch([Parameter(Mandatory = $true)][string]$SliceId) {
     return "sdd/$SliceId"
 }
 
+function Get-TargetThroughline([Parameter(Mandatory = $true)][string]$TargetId) {
+    # Absolute <target>/.throughline (its SDD provenance home).
+    $e = Get-TargetEntry $TargetId
+    $td = if ($e.ContainsKey("throughline_dir") -and $e["throughline_dir"]) { $e["throughline_dir"] } else { ".throughline" }
+    return (Join-Path $e["path"] $td)
+}
+
 function Add-LogEntry {
-    # Append a structured record to wiki/log.md (Principle VII).
+    # Append a structured record to a log (Principle VII). LogFile defaults to the framework
+    # wiki/log.md (framework-level events); slice-phase commands pass the target log:
+    # (Join-Path (Get-TargetThroughline <id>) 'wiki\log.md').
     param(
         [Parameter(Mandatory = $true)][string]$Agent,
         [Parameter(Mandatory = $true)][string]$Command,
         [string]$Target = "-",
         [string]$Verdict = "-",
         [Parameter(Mandatory = $true)][string]$Summary,
-        [string]$Artifacts = "-"
+        [string]$Artifacts = "-",
+        [string]$LogFile = ""
     )
-    $root = Get-RepoRoot
     $ts = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     $line = "| $ts | $Agent | $Command | $Target | $Verdict | $Summary | $Artifacts |"
-    Add-Content -Path (Join-Path $root "wiki\log.md") -Value $line -Encoding utf8
+    if (-not $LogFile) { $LogFile = (Join-Path (Get-RepoRoot) "wiki\log.md") }
+    Add-Content -Path $LogFile -Value $line -Encoding utf8
 }

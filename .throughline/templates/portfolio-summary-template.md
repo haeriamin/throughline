@@ -6,9 +6,11 @@
 **Dataset**: [N] target(s), [N] completed slice(s), [N] report(s)
 **Portfolio verdict**: HEALTHY | AT-RISK | INSUFFICIENT-DATA
 
-> Written by `/dev.audit`. Lives at the `review-reports/` root (portfolio scope; the dashboard
-> groups it under the `-` target). A portfolio with < 3 slices reports `INSUFFICIENT-DATA` for
-> systemic analysis — that is **not** a clean bill of health.
+> Written by `/dev.audit`. Lives at the framework `audit/` root (portfolio scope; the
+> dashboard groups it under the `-` target). Per-slice test and review reports now live under each
+> target's `<target>/.throughline/review-reports/`; this roll-up reads across them. A portfolio
+> with < 3 slices reports `INSUFFICIENT-DATA` for systemic analysis — that is **not** a clean bill
+> of health.
 
 ## Verdicts per target
 

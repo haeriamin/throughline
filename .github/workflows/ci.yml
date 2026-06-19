@@ -142,9 +142,15 @@ jobs:
       - name: Core scripts smoke test (bash variants)
         run: |
           chmod +x .throughline/scripts/bash/*.sh
-          .throughline/scripts/bash/create-new-feature.sh smoke-test | grep -q '"FEATURE_NUM":"001"'
+          # Register a throwaway target whose provenance home is a temp dir (specs are target-side now).
+          SMOKE_DIR="$(mktemp -d)"
+          cp .throughline/templates/target-template.yml targets/smoke.yml
+          sed -i "s|^id:.*|id: smoke|" targets/smoke.yml
+          sed -i "s|^path:.*|path: \"$SMOKE_DIR\"|" targets/smoke.yml
+          .throughline/scripts/bash/create-new-feature.sh smoke smoke-test | grep -q '"FEATURE_NUM":"001"'
+          test -f "$SMOKE_DIR/.throughline/specs/001-smoke-test/spec.md"
           .throughline/scripts/bash/check-prerequisites.sh plan && exit 1 || true
-          rm -rf specs/001-smoke-test .throughline/feature.json
+          rm -rf "$SMOKE_DIR" targets/smoke.yml .throughline/feature.json
 
       - name: JSON artifacts parse
         run: |

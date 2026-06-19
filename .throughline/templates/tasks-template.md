@@ -5,6 +5,9 @@
 **Plan**: [link to plan.md]
 **Created**: [DATE]
 
+> This task list lives at `<target>/.throughline/specs/[NNN-short-name]/tasks.md`, beside its
+> `spec.md` and `plan.md`.
+>
 > Rules (constitution + ARCHITECTURE.md §12.2):
 > - Each task = one logical unit of behavior, independently testable and reversible.
 > - Order: scaffolding → interfaces/contracts → core logic → integration → tests hardening → docs.

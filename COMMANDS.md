@@ -52,13 +52,13 @@ Run individually when you want phase-by-phase control instead of `/dev:feature`.
 | Command | Arguments | Produces | Notes |
 |---------|-----------|----------|-------|
 | `/throughline:constitution` | `[amendment]` | Amended `.throughline/memory/constitution.md` | Human approval + version bump required |
-| `/throughline:specify` | `"<description incl. target>"` | `specs/NNN-*/spec.md` | WHAT + WHY; records the Target; max 3 `[NEEDS CLARIFICATION]` |
+| `/throughline:specify` | `"<description incl. target>"` | `<target>/.throughline/specs/NNN-*/spec.md` | WHAT + WHY; records the Target; max 3 `[NEEDS CLARIFICATION]` |
 | `/throughline:clarify` | — | Resolved markers in spec.md | Max 3 questions per run; waits for your answers |
-| `/throughline:plan` | `[context]` | `specs/NNN-*/plan.md` | `before_plan` hook runs `/dev:analyze`; HIGH/CRITICAL requires `/dev:design` |
-| `/throughline:tasks` | — | `specs/NNN-*/tasks.md` | Atomic, dependency-ordered; every task cites FR + standard |
+| `/throughline:plan` | `[context]` | `<target>/.throughline/specs/NNN-*/plan.md` | `before_plan` hook runs `/dev:analyze`; HIGH/CRITICAL requires `/dev:design` |
+| `/throughline:tasks` | — | `<target>/.throughline/specs/NNN-*/tasks.md` | Atomic, dependency-ordered; every task cites FR + standard |
 | `/throughline:implement` | — | Implemented slice on branch `sdd/<slice>` | Chains `/dev:implement` → `/dev:test` → `/dev:review` (mandatory) |
 | `/throughline:analyze` | — | Consistency-matrix report | Cross-artifact check; routes findings to the owning phase |
-| `/throughline:checklist` | `[requirements\|design\|implementation\|release]` | `specs/NNN-*/checklists/<type>.md` | Verifies; never modifies artifacts |
+| `/throughline:checklist` | `[requirements\|design\|implementation\|release]` | `<target>/.throughline/specs/NNN-*/checklists/<type>.md` | Verifies; never modifies artifacts |
 
 ## Agent Commands
 
@@ -69,15 +69,15 @@ Run individually when you want phase-by-phase control instead of `/dev:feature`.
 | `/dev:ingest-standards` | Archivist | — | `wiki/standards-summary.md` (+ concepts, index, log) |
 | `/dev:ingest-exemplars` | Archivist | — | `wiki/pattern-library.md` (+ concepts, index, log) |
 | `/dev:ideate` | Analyst | `"<rough idea>" [target-id]` | `work-queue/pending/<topic>-ideation.md` — read-only brainstorming before any spec; explores options/trade-offs/risks, recommends a direction, builds nothing |
-| `/dev:analyze` | Analyst | `<target-id> [scope]` | `work-queue/in-progress/<slice>-analysis.md` |
-| `/dev:design` | Architect | `<slice-id>` | `specs/NNN-*/design.md` + ADR index entries (required for HIGH/CRITICAL) |
+| `/dev:analyze` | Analyst | `<target-id> [scope]` | `<target>/.throughline/specs/NNN-<slice>/analysis.md` (out-of-band bulk scans → `work-queue/pending/`) |
+| `/dev:design` | Architect | `<slice-id>` | `<target>/.throughline/specs/NNN-*/design.md` + ADR index entries in `<target>/.throughline/wiki/decision-registry.md` (required for HIGH/CRITICAL) |
 | `/dev:scaffold` | Implementer | `<slice-id>` | Greenfield skeleton at the target with verified-green test/lint loop |
-| `/dev:implement` | Implementer | `<slice-id>` | Target source on `sdd/<slice>` + Decision Records per task + `<target>/.throughline/CHANGELOG.md` entry |
-| `/dev:test` | Tester | `<slice-id>` | Target test files + `review-reports/<target>/<slice>-tests.md` (real execution evidence) |
-| `/dev:review` | Reviewer | `<slice-id>` | `review-reports/<target>/<slice>-review.md` — PASS / CONDITIONAL_PASS / FAIL |
-| `/dev:audit` | Auditor | `[target-id]` | `review-reports/portfolio-summary.md` + `recommendations.md` |
+| `/dev:implement` | Implementer | `<slice-id>` | Target source on `sdd/<slice>` + Decision Records per task in `<target>/.throughline/specs/NNN-<slice>/implementation.md` + `<target>/.throughline/CHANGELOG.md` entry |
+| `/dev:test` | Tester | `<slice-id>` | Target test files + `<target>/.throughline/review-reports/<slice>-tests.md` (real execution evidence) |
+| `/dev:review` | Reviewer | `<slice-id>` | `<target>/.throughline/review-reports/<slice>-review.md` — PASS / CONDITIONAL_PASS / FAIL |
+| `/dev:audit` | Auditor | `[target-id]` | `audit/portfolio-summary.md` + `recommendations.md` |
 | `/dev:lint-wiki` | Archivist | `[--write]` | Findings table (links, staleness, citation + skill parity, log integrity, concept-page scope) |
-| `/dev:review-escalated` | Orchestrator + human + Archivist | — | `wiki/exception-registry.md` entries + queue moves; waits for your decisions |
+| `/dev:review-escalated` | Orchestrator + human + Archivist | — | `<target>/.throughline/wiki/exception-registry.md` entries (this-target/slice scope) + queue moves; waits for your decisions |
 
 ---
 

@@ -7,7 +7,7 @@
 
 1. ❌ NEVER implement without a completed Analyst report (and an Approved design.md for HIGH/CRITICAL)
 2. ✅ ALWAYS cite spec requirement + standard clause for every change; exemplar basis when one exists (Principle III)
-3. ✅ ALWAYS work on branch `sdd/<slice>` (git targets) or back up originals to `work-queue/backups/<slice>/` first (non-git) — Principle VI
+3. ✅ ALWAYS work on branch `sdd/<slice>` (git targets) or back up originals to `<target>/.throughline/work-queue/backups/<slice>/` first (non-git) — Principle VI
 4. ❌ NEVER produce a change with confidence < 0.70 without flagging it for review
 5. ❌ NEVER modify target CI/CD config, secrets, `.git/` internals, or files outside the target root
 6. ❌ NEVER add a dependency not named in the plan — stop the task and escalate instead
@@ -37,17 +37,17 @@ When a task cannot be completed at confidence ≥ 0.70:
 ```text
 /* ============================================================
    DEV-STATUS: PARTIAL | UNRESOLVED
-   Requirement: specs/NNN-<slice>/spec.md §FR-X
+   Requirement: <target>/.throughline/specs/NNN-<slice>/spec.md §FR-X
    Reason: <specific reason>
    Confidence: 0.XX (below threshold)
    Standard: standards/<file>.md §<RULE-ID> applies
    Wiki: [[wiki/concepts/<relevant-page>]]
    Action Required: Human review before finalizing
-   Logged: work-queue/escalated/<slice>-escalation.md
+   Logged: <target>/.throughline/work-queue/escalated/<slice>-escalation.md
    ============================================================ */
 ```
 
-3. Add the entry to `wiki/exception-registry.md` and (if BLOCKING) the escalation artifact
+3. Add the entry to `<target>/.throughline/wiki/exception-registry.md` (global-scoped entries promote to the framework `wiki/exception-registry.md`) and (if BLOCKING) the escalation artifact
 4. Continue with independent tasks; >30% PARTIAL → halt the slice and escalate
 
 ---

@@ -1,8 +1,8 @@
 # /dev.audit
 
 **Agent**: Auditor
-**Reads**: `review-reports/**`, `work-queue/**`, `wiki/**`, `specs/**`, `targets/**`
-**Writes**: `review-reports/portfolio-summary.md`, `review-reports/recommendations.md`; append to `wiki/log.md`
+**Reads**: `targets/*.yml` and each registered target's `<target>/.throughline/**` (its `review-reports/`, `specs/NNN-*/implementation.md` Decision Records, `wiki/decision-registry.md`), the global `audit/**`, `work-queue/**`, framework `wiki/**`
+**Writes**: `audit/portfolio-summary.md`, `audit/recommendations.md` (both at the framework root); append to the framework `wiki/log.md`
 **Never writes**: target source, `/wiki/**` content (recommendations only), `/standards/**`, `/exemplars/**`
 
 ## Arguments
@@ -14,7 +14,9 @@
 ## Steps
 
 1. **Bootstrap** (Principle II, steps 1–3).
-2. Aggregate all review + test reports (scoped to the target if given): verdict counts,
+2. Aggregate all review + test reports from every registered target's
+   `<target>/.throughline/review-reports/` (iterate `targets/*.yml`; scoped to the target if
+   given) plus the global `audit/`: verdict counts,
    mean confidence per sub-score, retry rates, escalation rate. **State the dataset size**
    (targets, completed slices, reports) up front and carry it into every claim — an audit over
    1 slice and an audit over 50 must not read the same. Guard every rate: a per-target
@@ -30,25 +32,28 @@
    "watch items", not patterns.
 4. **Exemplar gaps** — two detectors, run both:
    (a) **Missing**: pattern classes cited with a "none exists" exemplar basis ≥ 3 times across
-   Decision Records — the **Implementation** Decision Records in
-   `work-queue/**/<slice>-implementation.md` *and* any ADRs in `wiki/decision-registry.md`
-   (the registry is empty for design-less lanes, so read both).
+   Decision Records — the **Implementation** Decision Records in each target's
+   `<target>/.throughline/specs/NNN-*/implementation.md` *and* any ADRs in that target's
+   `<target>/.throughline/wiki/decision-registry.md` (plus the framework
+   `wiki/decision-registry.md` for global-scoped ADRs; registries are empty for design-less
+   lanes, so read all).
    (b) **Un-ingested**: reconcile `/exemplars/good|anti/**` on disk against the `Source`/`PAT`
    entries in `wiki/pattern-library.md` — an exemplar that exists but was never ingested (or a
    Decision Record that had to cite an exemplar **by file path instead of a `PAT-NNN`**) is a
    gap regardless of count. This is the common real case the ≥ 3 "none exists" filter cannot see.
 5. **Stale-knowledge check**: slices completed before the latest
    `/dev.ingest-standards` run that cite since-changed rules → re-validation candidates.
-6. Write `review-reports/portfolio-summary.md` from
+6. Write `audit/portfolio-summary.md` from
    `.throughline/templates/portfolio-summary-template.md` (dataset size, an overall **portfolio
    verdict** — `HEALTHY` / `AT-RISK` / `INSUFFICIENT-DATA` — verdict table per target, trends,
-   systemic issues, gaps, re-validation candidates) and `review-reports/recommendations.md` from
+   systemic issues, gaps, re-validation candidates) and `audit/recommendations.md` from
    `.throughline/templates/recommendations-template.md` (actions for the Archivist/human:
    exemplars to curate or ingest, standards to clarify, wiki pages to update). **Trends** need
    ≥ 2 time points — omit the section (don't fabricate a trend) below that. The Auditor
-   recommends; only the Archivist writes wiki content. Both portfolio files live at the
-   `review-reports/` root (not under a `review-reports/<target>/` folder); the dashboard groups
-   them under the portfolio (`-`) target — keep that convention.
+   recommends; only the Archivist writes wiki content. Both portfolio files are the global
+   audit roll-up and stay at the framework `audit/` root (per-slice test/review reports
+   now live in each `<target>/.throughline/review-reports/`); the dashboard groups the root files
+   under the portfolio (`-`) target — keep that convention.
 7. Append to `wiki/log.md` (insert before any trailing comment block, as in `/dev.lint-wiki`).
 
 ## Exit Criteria

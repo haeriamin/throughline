@@ -1,8 +1,8 @@
 # /dev.scaffold
 
 **Agent**: Implementer
-**Reads**: `specs/NNN-*/{spec,plan,design,tasks}.md`, `targets/<id>.yml`, `wiki/**`, `/exemplars/**` (via skill)
-**Writes**: target project skeleton at the registered path; `work-queue/in-progress/<slice>-scaffold-report.md`; append to `wiki/log.md`
+**Reads**: `<target>/.throughline/specs/NNN-*/{spec,plan,design,tasks}.md`, `targets/<id>.yml`, framework `wiki/**` + `<target>/.throughline/wiki/**`, `/exemplars/**` + `<target>/.throughline/exemplars/**` (via skill)
+**Writes**: target project skeleton at the registered path; `<target>/.throughline/specs/NNN-*/scaffold.md`; append to `<target>/.throughline/wiki/log.md`
 **Never writes**: `/standards/**`, `/exemplars/**`, anything outside the target root
 
 ## Preconditions
@@ -22,9 +22,9 @@
    exit 0 on the empty skeleton before any feature code exists. Update
    `targets/<id>.yml` with the verified commands via `/dev.target update`.
 4. Record an Implementation Decision Record per scaffold choice (Principle III).
-5. Write `work-queue/in-progress/<slice>-scaffold-report.md`: tree created, commands
+5. Write `<target>/.throughline/specs/NNN-*/scaffold.md`: tree created, commands
    verified, Decision Records, rollback note (branch name).
-6. Append to `wiki/log.md`. **Do not merge** — scaffold goes through `/dev.review`
+6. Append to `<target>/.throughline/wiki/log.md`. **Do not merge** — scaffold goes through `/dev.review`
    like any other implementation.
 
 ## Exit Criteria

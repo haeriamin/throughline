@@ -12,7 +12,7 @@ Make every change reviewable in one artifact: what changed, why (spec), under wh
 
 1. Establish the comparison base:
    - Git target: `git diff <default_branch>...sdd/<slice>` from the target root.
-   - Non-git target: compare `work-queue/backups/<slice>/` against current files.
+   - Non-git target: compare `<target>/.throughline/work-queue/backups/<slice>/` against current files.
 2. Segment the diff by task (using the implementation report's files-changed-per-task mapping).
 3. Pair each segment with its Implementation Decision Record; flag any hunk with NO owning record as `UNATTRIBUTED` (automatic review finding).
 4. Annotate each segment header with: task id, spec §, standard §, exemplar basis, confidence.
@@ -23,7 +23,7 @@ Make every change reviewable in one artifact: what changed, why (spec), under wh
 # Diff: <slice> (target: <id>, base: <rev>)
 
 ## T003 — <task name> (confidence 0.XX)
-- Spec: specs/NNN-*/spec.md §FR-2 | Standard: standards/api-design.md §API-02 | Exemplar: exemplars/good/api/...
+- Spec: <target>/.throughline/specs/NNN-*/spec.md §FR-2 | Standard: standards/api-design.md §API-02 | Exemplar: exemplars/good/api/...
 ```diff
 @@ -10,6 +10,14 @@ ...
 ```

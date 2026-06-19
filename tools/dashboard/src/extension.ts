@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext): void {
     DashboardPanel.refreshIfOpen(m);
     if (m) {
       const escalated = m.stats().escalated;
-      statusBar.text = escalated > 0 ? `$(warning) SDD: ${escalated} escalated` : "$(shield) SDD";
+      statusBar.text = escalated > 0 ? `$(warning) Throughline: ${escalated} escalated` : "$(shield) Throughline";
       statusBar.tooltip = "Throughline — open dashboard";
       statusBar.backgroundColor =
         escalated > 0 ? new vscode.ThemeColor("statusBarItem.warningBackground") : undefined;
@@ -55,34 +55,48 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("sdd.openDashboard", () => DashboardPanel.show(resolveModel))
   );
 
-  // Watch framework state dirs; re-arm when the resolved root changes.
-  let watcher: vscode.FileSystemWatcher | undefined;
+  // Watch framework state dirs + each target's .throughline/ home; re-arm when the root changes.
+  let watchers: vscode.FileSystemWatcher[] = [];
   let debounce: NodeJS.Timeout | undefined;
   const armWatcher = (): void => {
-    watcher?.dispose();
-    watcher = undefined;
+    for (const w of watchers) {
+      w.dispose();
+    }
+    watchers = [];
     const m = resolveModel();
     if (!m) {
       return;
     }
-    watcher = vscode.workspace.createFileSystemWatcher(
-      new vscode.RelativePattern(vscode.Uri.file(m.root), "{specs,work-queue,review-reports,targets,wiki}/**")
-    );
     const onChange = (): void => {
       if (debounce) {
         clearTimeout(debounce);
       }
       debounce = setTimeout(refreshAll, 400);
     };
-    watcher.onDidCreate(onChange);
-    watcher.onDidChange(onChange);
-    watcher.onDidDelete(onChange);
+    const arm = (w: vscode.FileSystemWatcher): void => {
+      w.onDidCreate(onChange);
+      w.onDidChange(onChange);
+      w.onDidDelete(onChange);
+      watchers.push(w);
+    };
+    // Framework state (live queue, portfolio reports, targets registry, shared wiki/log).
+    arm(
+      vscode.workspace.createFileSystemWatcher(
+        new vscode.RelativePattern(vscode.Uri.file(m.root), "{work-queue,audit,targets,wiki}/**")
+      )
+    );
+    // Each registered target's .throughline/ provenance home (specs, reports, queue, wiki).
+    for (const tt of m.targetThroughlineDirs()) {
+      arm(vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(vscode.Uri.file(tt), "**")));
+    }
   };
   // Dispose the current watcher and cancel any pending debounce on shutdown; re-arming above
   // already disposes the previous watcher, so watchers never accumulate in context.subscriptions.
   context.subscriptions.push({
     dispose: (): void => {
-      watcher?.dispose();
+      for (const w of watchers) {
+        w.dispose();
+      }
       if (debounce) {
         clearTimeout(debounce);
       }

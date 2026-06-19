@@ -16,7 +16,7 @@
 
 ## Escalation Artifact
 
-Write `work-queue/escalated/<slice>-escalation.md`:
+Write `<target>/.throughline/work-queue/escalated/<slice>-escalation.md`:
 
 ```markdown
 # Escalation: <slice>
@@ -40,12 +40,12 @@ Write `work-queue/escalated/<slice>-escalation.md`:
 ## Rules
 
 - Escalation is a SUCCESS path (Principle V) — never frame it as failure, never guess to avoid it.
-- Move the work item to `work-queue/escalated/`; append to `wiki/log.md`.
+- Move the live work item to the global `work-queue/escalated/`; append the escalation event to `<target>/.throughline/wiki/log.md`.
 - Work that can proceed independently of the blocked item continues; everything touching it freezes.
-- Resolution happens ONLY through `/dev.review-escalated` (human decision, recorded in `wiki/exception-registry.md`).
+- Resolution happens ONLY through `/dev.review-escalated` (human decision, recorded in `<target>/.throughline/wiki/exception-registry.md`; global-scoped decisions go to the framework `wiki/exception-registry.md`).
 
 ## Post-Resolution
 
 1. Orchestrator moves the item back to `in-progress` (or `completed`/abandoned per decision)
 2. The blocked command re-runs with the registry entry as added context
-3. If the decision implies a new exemplar or standards change → follow-up entry in `review-reports/recommendations.md`
+3. If the decision implies a new exemplar or standards change → follow-up entry in `audit/recommendations.md`

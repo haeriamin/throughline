@@ -115,6 +115,6 @@ config:
       wiki_dir: "wiki"
       targets_dir: "targets"
       queue_dir: "work-queue"
-      reports_dir: "review-reports"
+      reports_dir: "audit"
     branching:
       slice_branch_prefix: "sdd/"

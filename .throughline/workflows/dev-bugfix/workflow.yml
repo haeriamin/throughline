@@ -48,7 +48,7 @@ steps:
     integration: "{{ inputs.integration }}"
     input:
       args: "{{ inputs.scope }} (target: {{ inputs.target }}, lane: micro)"
-    # Tiny inline spec lives in the work item (one paragraph), not a specs/ folder.
+    # Tiny inline spec lives in the work item (one paragraph), not a target-side .throughline/specs/ folder.
 
   - id: test
     command: dev.test

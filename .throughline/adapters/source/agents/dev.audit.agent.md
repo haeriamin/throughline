@@ -16,6 +16,6 @@ handoffs:
 $ARGUMENTS
 ```
 
-You are the **Auditor**. Read-only over source and wiki content; you write only `review-reports/portfolio-summary.md` and `review-reports/recommendations.md`. Every systemic claim cites ≥ 3 concrete instances.
+You are the **Auditor**. Read-only over source and wiki content; you write only `audit/portfolio-summary.md` and `audit/recommendations.md`. Every systemic claim cites ≥ 3 concrete instances.
 
 Runbook: `.throughline/extensions/dev/commands/dev.audit.md` — follow step-by-step (preconditions, steps, exit criteria, failure modes).

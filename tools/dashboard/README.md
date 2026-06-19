@@ -1,20 +1,20 @@
-# SDD Agent Framework Dashboard (VS Code Extension)
+# Throughline Dashboard (VS Code Extension)
 
-Live visibility into the framework's plain-text state — no database, the repo *is* the database.
+Live visibility into the framework's plain-text state and each registered target's `.throughline/` provenance — no database, the repos *are* the database.
 
 ## What it shows
 
-**Activity-bar views** ("SDD Dashboard" container):
+**Activity-bar views** ("Throughline Dashboard" container):
 - **Targets** — registered external projects (`targets/*.yml`) with status and stack; click opens the entry.
-- **Slices** — every `specs/NNN-*` with lifecycle phase (Needs Clarification → Specified → Planned → Tasked → Implementing → Implemented → Done) and task progress parsed from `tasks.md` checkboxes.
-- **Work Queue** — pending / in-progress / completed / escalated items from `work-queue/`.
-- **Reports** — test + review reports from `review-reports/`, grouped by target, with verdict badges (PASS / CONDITIONAL_PASS / FAIL).
+- **Slices** — every slice under each target's `<target>/.throughline/specs/NNN-*` with lifecycle phase (Needs Clarification → Specified → Planned → Tasked → Implementing → Implemented → Done) and task progress parsed from `tasks.md` checkboxes.
+- **Work Queue** — pending / in-progress / escalated items from the framework's live `work-queue/`, plus each target's `.throughline/work-queue/` (completed / escalated records).
+- **Reports** — test + review reports from each target's `.throughline/review-reports/` plus the framework's global `audit/` portfolio roll-ups, grouped by target, with verdict badges (PASS / CONDITIONAL_PASS / FAIL).
 
-**Dashboard webview** (`SDD: Open Dashboard`): summary cards (targets, active slices, escalations), verdict distribution bar, slice pipeline table, recent `wiki/log.md` entries.
+**Dashboard webview** (`Throughline: Open Dashboard`): summary cards (targets, active slices, escalations), verdict distribution bar, slice pipeline table, recent `wiki/log.md` entries.
 
-**Status bar**: escalation counter — turns warning-colored when `work-queue/escalated/` is non-empty; click opens the dashboard.
+**Status bar**: escalation counter — turns warning-colored when the framework's `work-queue/escalated/` lane is non-empty; click opens the dashboard.
 
-Everything refreshes automatically via file watchers on `specs/`, `work-queue/`, `review-reports/`, `targets/`, and `wiki/`.
+Everything refreshes automatically via file watchers on the framework's `work-queue/`, `audit/`, `targets/`, and `wiki/`, plus each registered target's `.throughline/` (its `specs/`, `review-reports/`, and `work-queue/`).
 
 ## Framework root resolution
 
@@ -33,7 +33,7 @@ npm run compile
 ```
 
 - **Develop**: open `tools/dashboard` in VS Code and press **F5** (Extension Development Host).
-- **Install**: `npx @vscode/vsce package` → `code --install-extension sdd-dashboard-0.1.0.vsix`
-  (or "Extensions: Install from VSIX…" in the command palette).
+- **Install (prebuilt)**: grab the `.vsix` from the latest GitHub **Release**, then run **Extensions → ⋯ → Install from VSIX…** (or `code --install-extension throughline-dashboard-<version>.vsix`). Releases are built by [`.github/workflows/release.yml`](../../.github/workflows/release.yml) on a `dashboard-v*` tag; the `.vsix` is gitignored, never committed.
+- **Install (build it yourself)**: `npx @vscode/vsce package` (Node 20+) → install the produced `.vsix`.
 
 Zero runtime dependencies; TypeScript only.

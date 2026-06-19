@@ -1,9 +1,9 @@
 # /dev.analyze
 
 **Agent**: Analyst
-**Reads**: target source (read-only, path from `targets/<id>.yml`), `wiki/**`, `/standards/**` (via skill), `/exemplars/**` (via skill), active `specs/NNN-*/spec.md`
-**Writes**: `work-queue/in-progress/<slice>-analysis.md` (or `work-queue/pending/` for bulk discovery); append to `wiki/log.md`
-**Never writes**: target source, `/standards/**`, `/exemplars/**`, `/wiki/**` (except log)
+**Reads**: target source (read-only, path from `targets/<id>.yml`), framework `wiki/**` + the active target's `<target>/.throughline/wiki/**`, `/standards/**` + `<target>/.throughline/standards/**` (via skill), `/exemplars/**` + `<target>/.throughline/exemplars/**` (via skill), active `<target>/.throughline/specs/NNN-*/spec.md`
+**Writes**: slice mode → `<target>/.throughline/specs/NNN-<slice>/analysis.md`; bulk discovery → `work-queue/pending/` (global backlog); append to `<target>/.throughline/wiki/log.md` (slice mode) or the framework `wiki/log.md` (bulk discovery)
+**Never writes**: target source, `/standards/**`, `/exemplars/**`, `wiki/**` content (framework or target) except the applicable log
 
 ## Arguments
 
@@ -47,7 +47,7 @@ Inside a slice, target and scope come from the active `spec.md`.
    - Recommended Approach: ...
    - Confidence: 0.XX
    ```
-7. Append to `wiki/log.md`.
+7. Append to the log: `<target>/.throughline/wiki/log.md` in slice mode, the framework `wiki/log.md` in bulk-discovery mode.
 
 ## Exit Criteria
 
@@ -57,4 +57,4 @@ Inside a slice, target and scope come from the active `spec.md`.
 
 - **Target path unreachable** → stop; report; do not analyze stale local copies.
 - **Scope matches nothing** → report empty scope rather than widening it silently.
-- **Confidence < 0.70** → still write the report, but mark `ESCALATION-RECOMMENDED` and create `work-queue/escalated/<slice>-escalation.md` per the escalation protocol.
+- **Confidence < 0.70** → still write the report, but mark `ESCALATION-RECOMMENDED` and create the escalation report `<target>/.throughline/work-queue/escalated/<slice>-escalation.md` per the escalation protocol (the lightweight live work item stays in the global `work-queue/`).

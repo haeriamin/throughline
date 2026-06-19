@@ -20,7 +20,7 @@ Check `.throughline/extensions.yml` for `hooks.before_tasks` / `hooks.after_task
 ## Outline
 
 1. Verify prerequisites: `check-prerequisites -Phase tasks` (spec + plan exist; design Approved if HIGH/CRITICAL).
-2. Load plan (+ design if present). Create `specs/NNN-*/tasks.md` from `.throughline/templates/tasks-template.md`.
+2. Load plan (+ design if present). Create `<target>/.throughline/specs/NNN-*/tasks.md` from `.throughline/templates/tasks-template.md`.
 3. Derive tasks:
    - One task = one logical unit of behavior, independently testable and reversible (ARCHITECTURE.md §12.2).
    - Phase order: Setup → Interfaces & Contracts → Core Logic → Integration → Tests Hardening → Documentation.
@@ -31,4 +31,4 @@ Check `.throughline/extensions.yml` for `hooks.before_tasks` / `hooks.after_task
    - Every in-scope FR maps to ≥ 1 task; every task maps to ≥ 1 FR (no orphan work).
    - No task requires a dependency absent from the plan's new-dependency list.
    - Test-hardening tasks reference the spec's success criteria.
-5. Report: task count per phase, parallelizable count, dependency notes, readiness for `/throughline.implement`. Append to `wiki/log.md`.
+5. Report: task count per phase, parallelizable count, dependency notes, readiness for `/throughline.implement`. Append to `<target>/.throughline/wiki/log.md`.

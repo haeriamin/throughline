@@ -19,25 +19,25 @@ No agent acts on a development task without first establishing context.
 Mandatory bootstrap sequence for any task touching target code:
 
 1. Read `wiki/index.md`
-2. Read `wiki/standards-summary.md`
-3. Read `wiki/pattern-library.md`
-4. Read `wiki/exception-registry.md`
-5. Read `targets/<target-id>.yml` for the active target (stack, conventions, constraints)
-6. For task-specific standards: use the `standards-retrieval` skill against `/standards/**` (never rely on model-trained convention knowledge)
+2. Read `wiki/standards-summary.md` (and, for an active target, its `<target>/.throughline/wiki/standards-summary.md` delta)
+3. Read `wiki/pattern-library.md` (and the target's pattern deltas, if any)
+4. Read `wiki/exception-registry.md` (global) and the target's `<target>/.throughline/wiki/exception-registry.md`
+5. Read `targets/<target-id>.yml` for the active target (stack, conventions, constraints, `throughline_dir`)
+6. For task-specific standards: use the `standards-retrieval` skill against `/standards/**` **and** the target's `.throughline/standards/**` (target rules override org rules by id); never rely on model-trained convention knowledge
 
 Skipping the bootstrap is a hard violation. Review MUST fail any artifact produced without it.
 
 **Bootstrap economy (within an active slice)**: knowledge must be *present*, not re-read on every phase. Once a slice has an analysis report and plan — which embed the standards, patterns, and exceptions relevant to that slice — later phases (implement, test) satisfy the bootstrap by reading those slice artifacts plus the target entry, and re-read the full wiki summaries only when the analysis fingerprint is stale or an artifact is missing. This is an efficiency rule, not a loophole: the knowledge is loaded, just not redundantly. Two exemptions that always read sources directly: the Archivist during ingest, and the **Reviewer**, whose independent re-read of `/standards/` source is the integrity gate and is never amortized.
 
-Wiki concept pages may declare `**Scope**: target:<id>` (default: `global`). During bootstrap and retrieval, agents MUST ignore concept pages scoped to a different target — cross-project knowledge compounds; single-project internals do not leak.
+Wiki concept pages may declare `**Scope**: target:<id>` (default: `global`). Global concepts live in the framework `wiki/concepts/`; target-specific concepts live in `<target>/.throughline/wiki/concepts/`. During bootstrap and retrieval, agents MUST ignore concept pages scoped to a different target — cross-project knowledge compounds; single-project internals do not leak.
 
 ### III. Cite or Don't Ship
 
 Every implementation decision MUST cite:
 
-- **A spec requirement** — `specs/NNN-<slice>/spec.md §FR-X` — that mandates the change.
-- **A standard clause** — `standards/<file>.md §<RULE-ID>` — that the change complies with.
-- **An exemplar basis** — a specific `exemplars/<path>` — when a curated exemplar exists for the pattern class (the `pattern-matcher` skill determines this).
+- **A spec requirement** — `<target>/.throughline/specs/NNN-<slice>/spec.md §FR-X` (the slice's spec lives with the target) — that mandates the change.
+- **A standard clause** — `standards/<file>.md §<RULE-ID>` for an org rule, or `.throughline/standards/<file>.md §<RULE-ID>` for a target-local one — that the change complies with.
+- **An exemplar basis** — a specific `exemplars/<path>` (org) or `.throughline/exemplars/<path>` (target-local) — when a curated exemplar exists for the pattern class (the `pattern-matcher` skill determines this).
 
 A change without spec + standard citations is invalid and MUST be rejected by the Reviewer. Citations live in the Implementation Decision Record alongside the change.
 
@@ -79,12 +79,12 @@ Tuning these numbers is a constitutional amendment, not a config change.
 Every mutation of a target project MUST be reversible:
 
 - If the target is a git repository: all work happens on a dedicated branch `sdd/<slice-id>`; agents NEVER commit to the default branch and NEVER push without explicit human instruction.
-- If the target is not a git repository: before modifying any existing file, copy the original (preserving relative path) to `work-queue/backups/<slice-id>/` inside the framework.
+- If the target is not a git repository: before modifying any existing file, copy the original (preserving relative path) to `<target>/.throughline/work-queue/backups/<slice-id>/` (created even when `commit_artifacts: off`, in which case it is gitignored in the target).
 - Rollback procedure is documented in every implementation report.
 
 ### VII. Append-Only Operations Log
 
-Every state-changing operation MUST append a record to `wiki/log.md`. Records are append-only — never edit or delete past entries. Required fields: ISO-8601 timestamp, agent, command, target, verdict, summary, artifact links.
+Every state-changing operation MUST append a record to a log. Records are append-only — never edit or delete past entries. Required fields: ISO-8601 timestamp, agent, command, target, verdict, summary, artifact links. The log is **split by home**: framework-level events (ingests, target register/update, audits, escalation decisions, amendments) append to the framework `wiki/log.md`; per-slice events for a target (analyze, design, implement, test, review, slice close) append to that target's `<target>/.throughline/wiki/log.md`, so the slice's audit trail travels with the code. A cross-cutting event may be recorded in both.
 
 This log is the audit trail for the framework's own behavior; it is the primary forensic record when something goes wrong.
 
@@ -100,15 +100,15 @@ These are absolute. The hook layer enforces them; agents that depend on them bei
 
 | Path | Writers | Readers |
 |------|---------|---------|
-| `/standards/**` | **Humans only** | All agents |
-| `/exemplars/**` | **Humans only** | All agents |
-| `/wiki/**` (excl. `log.md`) | Archivist; Auditor (recommendations only) | All agents |
-| `/wiki/log.md` | **All agents (append-only)** | All agents |
-| `/specs/**` | Spec workflow agents; Architect (`design.md`) | All agents |
+| `/standards/**`, `/exemplars/**` (org seeds) | **Humans only** | All agents |
+| `<target>/.throughline/standards/**`, `<target>/.throughline/exemplars/**` (target-local) | **Humans only** | All agents |
+| `/wiki/standards-summary.md`, `/wiki/pattern-library.md`, registries (global-scoped) | Archivist; Auditor (recommendations only) | All agents |
+| `/wiki/log.md` (framework-level events) | **All agents (append-only)** | All agents |
 | `/targets/**` | Orchestrator (via `/dev.target`) | All agents |
-| `/work-queue/**` | Orchestrator (state moves); Analyst (analyses) | All agents |
-| `/review-reports/**` | Reviewer, Tester, Auditor | All agents |
-| `<target-path>/**` (external) | Implementer (source), Tester (tests) — only inside an active slice with an approved plan | Analyst, Reviewer, Auditor (read-only) |
+| `/work-queue/{pending,in-progress}/**` (live queue) | Orchestrator (state moves); Analyst (analyses) | All agents |
+| `/audit/{portfolio-summary,recommendations}.md` (global audit) | Auditor | All agents |
+| `<target>/.throughline/**` (specs, reports, completed/escalated queue, target wiki incl. its `log.md`, CHANGELOG) | the slice's agents — only inside an active slice | All agents |
+| `<target-path>/**` (external source + tests) | Implementer (source), Tester (tests) — only inside an active slice with an approved plan | Analyst, Reviewer, Auditor (read-only) |
 
 External target writes additionally obey Principle VI and MUST never touch the target's `.git/` internals, CI secrets, or files outside the target root.
 
@@ -139,7 +139,7 @@ Eight agents, single-purpose, no overlap:
 - **Implementer** — code writing at the target path. Cites spec + standard for every change. Never merges.
 - **Tester** — test authoring and execution at the target path. Produces test reports; never alters non-test source.
 - **Reviewer** — gatekeeper. Independently re-reads `/standards/` and the spec. Issues PASS/CONDITIONAL_PASS/FAIL.
-- **Auditor** — portfolio reporting across targets. Read-only over source; writes only to `/review-reports/` and recommends wiki updates.
+- **Auditor** — portfolio reporting across targets. Read-only over source; writes only to `/audit/` and recommends wiki updates.
 
 Cross-agent communication flows through the Orchestrator or through artifacts (queue files, review reports). Direct agent-to-agent calls are forbidden.
 
@@ -165,4 +165,4 @@ easily follow is a finding, not a matter of taste.
 - Complexity beyond the simplest workable solution MUST be justified against a specific principle (typically Principle V or the review thresholds).
 - Runtime behavioral guidance lives in `.github/instructions/*.instructions.md`; those files refine but never override this document.
 
-**Version**: 0.2.0 | **Ratified**: 2026-06-09 | **Last Amended**: 2026-06-13 (new section: Output Language — all artifacts written for people must use plain, simple English; Reviewer enforces)
+**Version**: 0.3.1 | **Ratified**: 2026-06-09 | **Last Amended**: 2026-06-19 (PATCH: renamed the framework audit roll-up directory `/review-reports/` → `/audit/`, disambiguating it from each target's per-slice `<target>/.throughline/review-reports/`; write-boundary table and Auditor scope updated; no semantic change)

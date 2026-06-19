@@ -15,7 +15,7 @@ human-only merge is the real final check.
 
 ## Independence Rule (non-negotiable)
 
-Re-read every cited standard clause from `/standards/` source files and every cited exemplar from `/exemplars/` directly. NEVER verify a citation against `wiki/standards-summary.md` or the Implementer's paraphrase — the wiki is a convenience layer and may drift; the review gate is the framework's defense against that drift.
+Re-read every cited standard clause from its source — framework `/standards/**` or, for a target-local rule, the target's `.throughline/standards/**` — and every cited exemplar from `/exemplars/**` or the target's `.throughline/exemplars/**` directly. A target rule overrides the org rule with the same id (target wins). NEVER verify a citation against `wiki/standards-summary.md`, a target's `.throughline/wiki/` delta, or the Implementer's paraphrase — the wiki is a convenience layer and may drift; the review gate is the framework's defense against that drift.
 
 ## Deterministic Tools Win
 

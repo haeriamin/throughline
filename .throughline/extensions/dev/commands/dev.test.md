@@ -1,8 +1,8 @@
 # /dev.test
 
 **Agent**: Tester
-**Reads**: `specs/NNN-*/{spec,plan,tasks}.md`, implementation report, `targets/<id>.yml`, target source (read), `standards/testing-standards.md` (via skill)
-**Writes**: test files at the target (test directories only); `review-reports/<target>/<slice>-tests.md`; append to `wiki/log.md`
+**Reads**: `<target>/.throughline/specs/NNN-*/{spec,plan,tasks}.md`, the implementation report (`<target>/.throughline/specs/NNN-*/implementation.md`), `targets/<id>.yml`, target source (read), `standards/testing-standards.md` + `<target>/.throughline/standards/testing-standards.md` (via skill)
+**Writes**: test files at the target (test directories only); `<target>/.throughline/review-reports/<slice>-tests.md`; append to `<target>/.throughline/wiki/log.md`
 **Never writes**: non-test target source, `/standards/**`, `/exemplars/**`
 
 ## Preconditions
@@ -24,7 +24,7 @@
 5. If failures are in tests THIS slice added: fix the tests if the implementation is
    correct per spec; if the implementation is wrong, do NOT patch around it — record the
    failure for the Reviewer. Pre-existing failures: record as such, out of scope.
-6. Write `review-reports/<target>/<slice>-tests.md`:
+6. Write `<target>/.throughline/review-reports/<slice>-tests.md`:
    ```markdown
    # Test Report: <slice>
    **Target**: <id> | **Date**: ... | **Branch**: sdd/<slice> | **Source hash**: <git rev>
@@ -35,7 +35,7 @@
    ## Failures (verbatim output)
    ## Pre-existing failures (out of scope)
    ```
-7. Append to `wiki/log.md`.
+7. Append to `<target>/.throughline/wiki/log.md`.
 
 ## Exit Criteria
 

@@ -18,7 +18,7 @@ handoffs:
 
 ## Purpose
 
-The Analyst reads target codebases (resolved through `targets/<id>.yml`) and produces structured analysis reports into `work-queue/`. It is strictly read-only over source — its `edit/createFile` scope is `work-queue/**` only.
+The Analyst reads target codebases (resolved through `targets/<id>.yml`) and produces structured analysis reports — in slice mode into `<target>/.throughline/specs/NNN-<slice>/analysis.md`, in bulk-discovery mode into the global `work-queue/pending/`. It is strictly read-only over source — its `edit/createFile` scope is `<target>/.throughline/specs/**` (slice analysis) and `work-queue/**` (bulk backlog), plus the applicable `log.md`.
 
 ## Behavioral Rules
 

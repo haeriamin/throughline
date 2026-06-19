@@ -1,8 +1,8 @@
 # 7 · The Dashboard
 
 A VS Code extension (`tools/dashboard/`) that renders the framework's state live. No
-database, no services — it parses the same markdown the agents write, and file watchers
-keep it current.
+database, no services — it parses the same markdown the agents write, across the framework
+and each registered target's `.throughline/` provenance, and file watchers keep it current.
 
 ## Install
 
@@ -28,13 +28,18 @@ For development instead: open `tools/dashboard` in VS Code and press **F5**
 | Work Queue | escalated / in-progress / pending / completed items | Opens the work item |
 | Reports | Test + review reports grouped by target, verdict-colored | Opens the report |
 
+Sources: each registered target's `<target>/.throughline/{specs,review-reports,work-queue}`
+for slices, test + review evidence, and per-target queue records; the framework's live
+`work-queue/` (pending / in-progress + the escalated lane), the global `audit/`
+portfolio roll-ups, and `wiki/log.md` for recent activity.
+
 **`SDD: Open Dashboard`** (command palette) — a polished webview: KPI cards (targets,
 active slices, escalations, pass rate), a verdict-distribution bar, the slice pipeline with
 status pills and per-slice task progress, and recent activity. It adapts to your VS Code
 theme (light/dark) and matches the editor's native look.
 
 **Status bar** — a persistent SDD item that turns warning-colored with a count whenever
-anything sits in `work-queue/escalated/`. Click it to open the dashboard.
+anything sits in the framework's `work-queue/escalated/` lane. Click it to open the dashboard.
 
 ## Configuration
 

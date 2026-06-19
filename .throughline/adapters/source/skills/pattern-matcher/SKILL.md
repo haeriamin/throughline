@@ -10,7 +10,7 @@ Translate "I need cursor-based pagination on this endpoint" into "apply PAT-007 
 
 ## Algorithm
 
-1. Read `wiki/pattern-library.md` — load all pattern entries.
+1. Read `wiki/pattern-library.md` and the active target's `.throughline/wiki/pattern-library.md` delta — load all pattern entries (a target entry overrides the global entry for the same need).
 2. Score each pattern against the target need:
 
 ### Scoring Dimensions

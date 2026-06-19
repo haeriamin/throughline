@@ -7,7 +7,7 @@ How the framework decides a piece of work is done — and what happens when it i
 "The tests pass" is never just a claim. It is a report: the exact command, the exit code,
 how many passed and failed, the real failure output, and a table that maps each changed
 behavior to its test (covered / failing / missing, with a reason). It is saved at
-`review-reports/<target>/<slice>-tests.md`. If the report is missing or out of date, the
+`<target>/.throughline/review-reports/<slice>-tests.md`. If the report is missing or out of date, the
 test score is **0** — no benefit of the doubt.
 
 ## The review (the Reviewer)
@@ -40,16 +40,17 @@ to the Implementer. **At most 2 retries**, then it goes to a human. The loop can
 
 ## Asking the human (`/dev:review-escalated`)
 
-When an agent is not confident enough, it writes a short file to `work-queue/escalated/`: what
-is done, what is blocked, the exact question(s) for you, the options with their trade-offs, and
-its suggestion. You decide. The Archivist saves your decision (as `EXC-NNN`) so it is reused
-next time, and the work continues from there. Asking the human is the system working as
-intended, not failing.
+When an agent is not confident enough, it writes a short escalation report under the target's
+`<target>/.throughline/work-queue/escalated/`: what is done, what is blocked, the exact
+question(s) for you, the options with their trade-offs, and its suggestion (the live escalated
+queue item the dashboard counts stays in the framework's `work-queue/escalated/`). You decide.
+The Archivist saves your decision (as `EXC-NNN`) so it is reused next time, and the work
+continues from there. Asking the human is the system working as intended, not failing.
 
 ## Undo and merging
 
 - Git projects: all work is on a branch `sdd/<slice>` — to undo, delete the branch.
-- Non-git projects: the originals are saved in `work-queue/backups/<slice>/` — to undo, put them back.
+- Non-git projects: the originals are saved in `<target>/.throughline/work-queue/backups/<slice>/` — to undo, put them back.
 - Every report says exactly how to undo its change.
 - **You always do the merge.** A PASS gives you a branch; no agent ever merges it.
 - The change also lands in `<target>/.throughline/CHANGELOG.md` on the same branch — what changed, the files, the cited spec/standards, and the verdict — so the record merges with the code and stays with the codebase.

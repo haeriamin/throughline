@@ -5,9 +5,10 @@
 **Generated**: [DATE]
 **For**: Archivist + human (the Auditor recommends; only the Archivist writes wiki content)
 
-> Written by `/dev.audit` alongside `portfolio-summary.md`. Each row is an action with the
-> evidence that motivates it. Note: an exemplar already curated on disk needs **ingesting**
-> (`/dev.ingest-exemplars`), not curation — pick the right action type.
+> Written by `/dev.audit` alongside `portfolio-summary.md` at the framework `audit/` root
+> (per-slice reports now live under each target's `<target>/.throughline/review-reports/`). Each
+> row is an action with the evidence that motivates it. Note: an exemplar already curated on disk
+> needs **ingesting** (`/dev.ingest-exemplars`), not curation — pick the right action type.
 
 ## Actions
 

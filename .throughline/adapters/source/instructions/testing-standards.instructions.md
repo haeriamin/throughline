@@ -22,7 +22,7 @@
 
 ## Evidence Format
 
-The report at `review-reports/<target>/<slice>-tests.md` MUST contain:
+The report at `<target>/.throughline/review-reports/<slice>-tests.md` MUST contain:
 - Exact command line and exit code
 - Pass/fail/skip counts and duration
 - Verbatim failure output (trimmed to the relevant frames)

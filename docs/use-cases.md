@@ -60,7 +60,7 @@ It specs the change, plans it, writes it on a branch, tests it, and has an indep
 /dev:feature my-app "Fix: pagination returns the wrong rows when page is negative" --micro
 ```
 
-The Implementer fixes it on a branch, the Tester writes a test that **fails before the fix and passes after**, and the Reviewer checks it independently. You get evidence and a record of *why* it changed, not just a patch. This is exactly what the [SWE-bench validation run](validation-runs/2026-06-16-swebench-pytest-11143.md) did on a real pytest issue — from the bug report alone, the fix passed the benchmark's own hidden test with no regressions. Drop `--micro` when the fix is large or risky enough to deserve a full spec and plan. *Workflow: `dev-bugfix`.*
+The Implementer fixes it on a branch, the Tester writes a test that **fails before the fix and passes after**, and the Reviewer checks it independently. You get evidence and a record of *why* it changed, not just a patch. Drop `--micro` when the fix is large or risky enough to deserve a full spec and plan. *Workflow: `dev-bugfix`.*
 
 ## 4. Start a new project
 

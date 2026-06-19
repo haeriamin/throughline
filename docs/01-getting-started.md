@@ -2,9 +2,9 @@
 
 ## Prerequisites
 
-- **An AI coding tool** — GitHub Copilot (VS Code), Claude Code, Codex, or Cursor (Tier A, hooks);
-  or a rules-only tool like Aider or Windsurf (Tier B, advisory). Pick any; per-host setup:
-  [docs/runtimes/](runtimes/).
+- **An AI coding tool** — any Tier A host (Claude Code, GitHub Copilot for VS Code or CLI, Codex,
+  Cursor, Antigravity, OpenCode, Qwen, Kimi) for enforced hooks, or a rules-only Tier B tool (Aider,
+  Windsurf, advisory). Pick any; per-host setup: [docs/runtimes/](runtimes/).
 - **git** — for the framework repo and for reversible changes on targets.
 - **Node.js 20+** — only if you want to build the [dashboard extension](07-dashboard.md).
 
@@ -38,8 +38,8 @@ Tools spell commands differently — same commands, same behavior:
 
 | Tool | Syntax |
 |------|--------|
-| Claude Code | `/dev:analyze`, `/throughline:specify` |
-| Copilot, Codex, Cursor | `/dev.analyze`, `/throughline` |
+| Claude Code, Qwen Code | `/dev:analyze`, `/throughline:specify` |
+| Copilot (VS Code), Codex, Cursor, Antigravity, OpenCode, Kimi | `/dev.analyze`, `/throughline` |
 | Copilot CLI | no slash commands — drive the lifecycle by asking for the agent (e.g. “use the dev.feature agent”) |
 | Aider, Windsurf | no slash commands — adopt personas from the rules bundle |
 

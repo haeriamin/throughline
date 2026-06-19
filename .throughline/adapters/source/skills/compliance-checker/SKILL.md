@@ -10,7 +10,7 @@ Mechanically grade code against the rule inventory. Produces the `standards_comp
 
 ## Algorithm
 
-1. Load rules via `standards-retrieval` filtered to the file's domain/language (ALWAYS from `/standards/` source, never the wiki — this skill backs the Reviewer's independence rule).
+1. Load rules via `standards-retrieval` filtered to the file's domain/language (ALWAYS from `/standards/` source plus the active target's `.throughline/standards/`, never the wiki — this skill backs the Reviewer's independence rule). A target-local rule overrides the org rule with the same Rule ID (target wins).
 2. Determine applicability per rule (Applies To + language + construct presence).
 3. For each applicable rule, evaluate it against the file/diff:
    - **If the rule names a `Tool`**: run it; its PASS/FAIL is authoritative (record the command + output). A BLOCKING rule whose tool was not run = FAIL, never assumed-pass.
@@ -36,6 +36,7 @@ Mechanically grade code against the rule inventory. Produces the `standards_comp
 ## Rules
 
 - Severity comes from the rule, never adjusted ad hoc.
+- Cite each rule by its source form — `standards/<file>.md §<RULE-ID>` (org) or `.throughline/standards/<file>.md §<RULE-ID>` (target-local).
 - A rule that cannot be evaluated is reported as such — silence is not compliance.
 
 ## Usage Context

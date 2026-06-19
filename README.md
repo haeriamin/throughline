@@ -1,8 +1,19 @@
+<div align="center">
+
+<img src="media/throughline-mark.svg" alt="Throughline" width="100" />
+
 # Throughline
 
-*An unbroken line from spec to reviewed code: every change cites the rule it follows, the test that proves it, and the reason it exists.*
+### *An unbroken line from spec to reviewed code.*
 
-You describe a change. Throughline turns it into a tested, independently reviewed feature on a branch that only you can merge — using the AI coding tool you already have. Your code stays where it is; the framework holds the process, your standards, and the shared memory. It works on any codebase, in any language.
+**You describe a change; Throughline turns it into a tested, independently reviewed feature on a branch only you can merge — using the AI coding tool you already have. Your code stays where it is; it works on any codebase, in any language.**
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-4F46E5)](LICENSE)&nbsp;
+[![Status: experimental](https://img.shields.io/badge/status-experimental-d29922)](STATUS.md)&nbsp;
+[![Docs](https://img.shields.io/badge/docs-user%20guide-4F46E5)](docs/README.md)&nbsp;
+[![GitHub stars](https://img.shields.io/github/stars/haeriamin/throughline?style=social)](https://github.com/haeriamin/throughline/stargazers)
+
+</div>
 
 ```bash
 /dev:target register path/to/my-app
@@ -20,25 +31,6 @@ Throughline is a spec-driven, multi-agent layer that drives your AI coding tool.
 
 → New here? Start with the [user guide](docs/README.md) and [core concepts](docs/02-concepts.md).
 
-## What it's good for (and what it's not)
-
-Reach for it on a change you'd want a careful teammate to review:
-
-- **Ship a feature** — `/dev:feature orders-api "add cursor pagination to GET /orders"` specs it, writes it on a branch, adds tests, and has an independent reviewer sign off before *you* merge.
-- **Fix a bug, with proof** — add `--micro` for a test that fails before the fix and passes after, plus a one-line record of why it changed (the exact shape of a real [pytest bug](docs/validation-runs/2026-06-16-swebench-pytest-11143.md) it fixed end to end).
-- **Get your bearings** — `/dev:analyze orders-api src/billing` maps the modules and the conventions they actually follow.
-- **Second opinion** — `/dev:review <slice>` re-reads your standards from source and returns PASS / CONDITIONAL_PASS / FAIL with cited reasons.
-
-**Skip it** for throwaway scripts, one-line tweaks, or plain questions — those go to your tool's normal chat. The rule of thumb: **a change goes through Throughline; a question goes to plain chat.** Full examples: [what to use Throughline for](docs/use-cases.md).
-
-## Why it exists
-
-Frontier models nail the happy path and miss the boring parts: forgotten validation, edge cases, error handling. Asking for "more" or "thorough" tests doesn't fix these *specification-completeness* bugs — it just adds happy-path tests.
-
-What works is **grounding**: tie each test to an enumerated spec rule, then have an independent reviewer check the result against the source standards. In a controlled study this produced correct code far more often than a strong "test the edges" baseline, held across three model families, and cut false rejections — the gain showing up exactly on the spec-completeness bugs that dominate real one-shot failures (on clean algorithmic problems it neither helps nor hurts).
-
-→ The numbers, the side-by-side runs, and a solved **SWE-bench Lite** issue: [validation-runs/](docs/validation-runs/).
-
 ## How it works
 
 ```mermaid
@@ -50,23 +42,13 @@ flowchart LR
   BR --> HM([human merges])
 ```
 
-Eight agents, each with one job, handing off through files rather than reaching into each other's work: Orchestrator, Analyst, Architect, Implementer, Tester, Reviewer, Archivist, Auditor.
-
-The review step is the heart of it. The Reviewer reads your standards from source (not the implementer's summary of them) and returns PASS, CONDITIONAL_PASS, or FAIL on a confidence score. It's the same kind of model on both sides, so treat it as a strong check rather than a second human. Your merge is the real final check.
-
-A few things hold this together. Every change cites the spec requirement it satisfies, the standard clause it follows, and an example when one exists — cite-or-don't-ship. Each change is a *slice* whose edits land on a dedicated `sdd/<slice>` branch **in your target's own repo**, not the framework; nothing touches your main branch until you merge, and to undo you just delete the branch (a target with no git repo is handled too — originals are backed up under `work-queue/backups/<slice>/`). Agents never merge or push, `/standards/` is read-only at the hook level, and a shared wiki compounds knowledge across tasks.
+Eight single-purpose agents (Orchestrator, Analyst, Architect, Implementer, Tester, Reviewer, Archivist, Auditor) hand off through files. The Reviewer reads your standards from source, not the implementer's summary — but it's the same kind of model on both sides, so your merge is the real final check. Every change cites the spec rule, standard, and example it follows (cite-or-don't-ship); each slice lands on its own `sdd/<slice>` branch in your target's repo; agents never merge or push, and `/standards/` is read-only at the hook level.
 
 → Deeper design: [ARCHITECTURE.md](ARCHITECTURE.md) · the rules every agent obeys: [the constitution](.throughline/memory/constitution.md).
 
 ## Requirements
 
-Close to nothing — Throughline is mostly markdown the model reads, and the engine is the AI tool you already have.
-
-- **git** — for the reversible per-change branches and to read your target's state.
-- **One AI coding tool** — any tool in the [table below](#pick-your-tool). That's the engine.
-- Everything else ships inside `.throughline/` (commands, runbooks, bash + PowerShell helper scripts). Write-safety hooks need **no extra runtime** (PowerShell on Windows, bash on macOS/Linux; **Python is not required**), and the VS Code dashboard is optional.
-
-Generated tool folders (`.claude/`, `.cursor/`, `.github/agents/`, etc.) are **not** in git — run `tools/install.*` after every fresh clone to generate them from `.throughline/adapters/source/` and wire hooks.
+**git** and **one AI coding tool** from the table below (that's the engine) — nothing else. Hooks need no extra runtime (PowerShell on Windows, bash elsewhere; **no Python**), and the VS Code dashboard is optional. Generated tool folders aren't in git: run `tools/install.*` after a fresh clone (see [First run](#first-run)).
 
 ## Getting started
 
@@ -109,28 +91,13 @@ bash tools/install.sh
 
 ### Ways to use it
 
-`/dev:feature` runs the whole lifecycle from one request. `--micro` (implement → test → review) and `--express` (skip the optional approval pauses) trade thoroughness for speed. You can also run each phase yourself (`/throughline:specify` … `/throughline:implement`), or single commands out of band (`/dev:ideate`, `/dev:analyze`, `/dev:test`, `/dev:review`, `/dev:audit`).
+`/dev:feature` runs the whole lifecycle from one request. `--micro` (implement → test → review) and `--express` (skip the optional approval pauses) trade thoroughness for speed. Each is spelled out per tool in the [runtime guides](docs/runtimes/) and the [building features](docs/04-building-features.md) guide.
 
-Each is spelled out in your tool's exact syntax in the [runtime guides](docs/runtimes/) and the [building features](docs/04-building-features.md) guide. Every slice also leaves a human-readable entry in the target's own `.throughline/CHANGELOG.md`.
-
-## For teams
-
-A better model makes each agent better; it doesn't fix consistency, audit trails, or trust across a team — that's the part Throughline is for. Your rules plus an independent review step make output consistent; every change links spec → task → rule → result and is recorded; hooks block risky writes and only people merge; and a shared wiki keeps the rules, examples, and decisions.
-
-Does it save tokens? Per task, no — it runs more steps. Over time it pays off like insurance: a little extra on every task, returned on the ones where it catches a bug that would have been expensive to find later. Worth it for code that matters; for throwaway changes, `--micro` or plain chat is the better call.
+**Skip it** for throwaway scripts or plain questions — a change goes through Throughline; a question goes to plain chat. ([what to use it for](docs/use-cases.md))
 
 ## Layout
 
-| Folder | What's inside |
-|--------|---------------|
-| `.throughline/` | The engine: constitution, command runbooks, templates, workflows, and the adapter source of truth (`.throughline/adapters/`) |
-| `.github/` · `.claude/` · `.codex/` · `.cursor/` | The per-tool adapters (generated from `.throughline/adapters/source/`), plus hooks (CI lives in `.github/`) |
-| `standards/` · `exemplars/` | Your rules and example code, the read-only inputs you write |
-| `wiki/` | What the agents remember, plus an append-only log of everything they do |
-| `specs/` · `work-queue/` · `review-reports/` | Per-task files and status |
-| `targets/` | The list of outside projects the agents work on |
-| `tools/dashboard/` | A VS Code extension with a live view of the work queue |
-| `docs/` | The user guide, including the per-tool runtime guides |
+**Two homes.** This repo is the portable **framework** — the engine (`.throughline/`), your `standards/` + `exemplars/`, the shared `wiki/`, the live cross-target `work-queue/`, and the Auditor's `audit/` roll-up. Each registered **target** carries its own SDD record under `<target>/.throughline/` (its `specs/`, `review-reports/`, `work-queue/` history, target-local rules, `wiki/`, and `CHANGELOG.md`) on the slice branch, so it travels with the code. Full map: [core concepts](docs/02-concepts.md).
 
 ## More
 

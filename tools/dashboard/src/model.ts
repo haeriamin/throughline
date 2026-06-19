@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 export interface TargetInfo {
   id: string;
   path: string;
+  throughlineDir: string;
   vcs: string;
   stack: string[];
   status: string;
@@ -158,6 +159,7 @@ export class FrameworkModel {
         return {
           id: y["id"] ?? path.basename(f, ".yml"),
           path: y["path"] ?? "",
+          throughlineDir: y["throughline_dir"] ?? ".throughline",
           vcs: y["vcs"] ?? "?",
           stack: (y["stack"] ?? "").replace(/[\[\]]/g, "").split(",").map((s) => s.trim()).filter(Boolean),
           status: y["status"] ?? "active",
@@ -167,30 +169,48 @@ export class FrameworkModel {
       });
   }
 
+  /** Absolute path to a target's SDD provenance home (<target>/.throughline). */
+  private targetThroughline(t: TargetInfo): string {
+    const base = path.isAbsolute(t.path) ? t.path : path.join(this.root, t.path);
+    return path.join(base, t.throughlineDir || ".throughline");
+  }
+
+  /** Absolute .throughline provenance homes for every registered target (for file watching). */
+  targetThroughlineDirs(): string[] {
+    return this.targets().map((t) => this.targetThroughline(t));
+  }
+
   slices(): SliceInfo[] {
     return this.buildSlices(this.reports());
   }
 
   private buildSlices(reports: ReportInfo[]): SliceInfo[] {
-    const specsDir = path.join(this.root, "specs");
-    let dirs: string[] = [];
-    try {
-      dirs = fs
-        .readdirSync(specsDir, { withFileTypes: true })
-        .filter((e) => e.isDirectory() && /^\d{3}-/.test(e.name))
-        .map((e) => path.join(specsDir, e.name));
-    } catch {
-      return [];
+    // Slices live under each registered target's <target>/.throughline/specs/.
+    const out: SliceInfo[] = [];
+    for (const t of this.targets()) {
+      const specsDir = path.join(this.targetThroughline(t), "specs");
+      let dirs: string[] = [];
+      try {
+        dirs = fs
+          .readdirSync(specsDir, { withFileTypes: true })
+          .filter((e) => e.isDirectory() && /^\d{3}-/.test(e.name))
+          .map((e) => path.join(specsDir, e.name));
+      } catch {
+        continue;
+      }
+      for (const dir of dirs) {
+        out.push(this.readSlice(dir, reports, t.id));
+      }
     }
-    return dirs.map((dir) => this.readSlice(dir, reports));
+    return out;
   }
 
-  private readSlice(dir: string, reports: ReportInfo[]): SliceInfo {
+  private readSlice(dir: string, reports: ReportInfo[], targetId: string): SliceInfo {
     const id = path.basename(dir);
     const specFile = path.join(dir, "spec.md");
     const spec = safeRead(specFile) ?? "";
     const targetMatch = /\*\*Target\*\*:\s*([^\s[\]]+)/.exec(spec);
-    const target = targetMatch ? targetMatch[1].trim() : "?";
+    const target = targetMatch ? targetMatch[1].trim() : targetId;
 
     const hasPlan = fs.existsSync(path.join(dir, "plan.md"));
     const hasTasks = fs.existsSync(path.join(dir, "tasks.md"));
@@ -248,42 +268,45 @@ export class FrameworkModel {
 
   queue(): QueueItem[] {
     const items: QueueItem[] = [];
+    const add = (f: string, state: QueueState) => {
+      let modified = new Date(0);
+      try {
+        modified = fs.statSync(f).mtime;
+      } catch {
+        /* keep epoch */
+      }
+      items.push({ name: path.basename(f, ".md"), state, file: f, modified });
+    };
+    // Global live lanes (cross-target orchestration); completed is per-target.
     for (const state of QUEUE_STATES) {
+      if (state === "completed") {
+        continue;
+      }
       for (const f of listFiles(path.join(this.root, "work-queue", state), ".md")) {
-        let modified = new Date(0);
-        try {
-          modified = fs.statSync(f).mtime;
-        } catch {
-          /* keep epoch */
-        }
-        items.push({ name: path.basename(f, ".md"), state, file: f, modified });
+        add(f, state);
+      }
+    }
+    // Per-target durable done records.
+    for (const t of this.targets()) {
+      for (const f of listFiles(path.join(this.targetThroughline(t), "work-queue", "completed"), ".md")) {
+        add(f, "completed");
       }
     }
     return items;
   }
 
   reports(): ReportInfo[] {
-    const reportsRoot = path.join(this.root, "review-reports");
     const out: ReportInfo[] = [];
-    const walk = (dir: string, target: string): void => {
-      let entries: fs.Dirent[] = [];
-      try {
-        entries = fs.readdirSync(dir, { withFileTypes: true });
-      } catch {
-        return;
+    // Framework: the global audit roll-up at audit/ root (portfolio scope = "-").
+    for (const f of listFiles(path.join(this.root, "audit"), ".md")) {
+      out.push(this.readReport(f, "-"));
+    }
+    // Per-target: per-slice test/review reports under <target>/.throughline/review-reports/.
+    for (const t of this.targets()) {
+      for (const f of listFiles(path.join(this.targetThroughline(t), "review-reports"), ".md")) {
+        out.push(this.readReport(f, t.id));
       }
-      for (const e of entries) {
-        const full = path.join(dir, e.name);
-        if (e.isDirectory()) {
-          // The target is the first-level directory under review-reports/; deeper
-          // directories (e.g. per-slice subfolders) keep that same top-level target.
-          walk(full, target === "-" ? e.name : target);
-        } else if (e.isFile() && e.name.endsWith(".md")) {
-          out.push(this.readReport(full, target));
-        }
-      }
-    };
-    walk(reportsRoot, "-");
+    }
     return out;
   }
 
@@ -313,34 +336,44 @@ export class FrameworkModel {
   }
 
   logTail(n: number): LogEntry[] {
-    const text = safeRead(path.join(this.root, "wiki", "log.md"));
-    if (!text) {
-      return [];
+    // Merge the framework log (framework-level events) with each target's
+    // <target>/.throughline/wiki/log.md (that target's slice events), newest first.
+    const texts: string[] = [];
+    const fw = safeRead(path.join(this.root, "wiki", "log.md"));
+    if (fw) {
+      texts.push(fw);
     }
-    const rows = text
+    for (const t of this.targets()) {
+      const tl = safeRead(path.join(this.targetThroughline(t), "wiki", "log.md"));
+      if (tl) {
+        texts.push(tl);
+      }
+    }
+    const entries = texts
+      .join("\n")
       .split(/\r?\n/)
       .filter((l) => /^\|\s*\d{4}-\d{2}-\d{2}T/.test(l))
-      .slice(-n)
-      .reverse();
-    return rows.map((row) => {
-      // Strip the leading/trailing table pipes first, then split. Columns:
-      // ts | agent | command | target | verdict | summary | artifacts
-      const cells = row
-        .replace(/^\s*\|/, "")
-        .replace(/\|\s*$/, "")
-        .split("|")
-        .map((c) => c.trim());
-      // A literal pipe inside summary/artifacts only shifts the trailing columns, so keep the
-      // five fixed leading fields and re-join any overflow into summary (artifacts is dropped).
-      return {
-        timestamp: cells[0] ?? "",
-        agent: cells[1] ?? "",
-        command: cells[2] ?? "",
-        target: cells[3] ?? "",
-        verdict: cells[4] ?? "",
-        summary: cells.length > 6 ? cells.slice(5, cells.length - 1).join(" | ") : (cells[5] ?? ""),
-      };
-    });
+      .map((row) => {
+        // Strip the leading/trailing table pipes first, then split. Columns:
+        // ts | agent | command | target | verdict | summary | artifacts
+        const cells = row
+          .replace(/^\s*\|/, "")
+          .replace(/\|\s*$/, "")
+          .split("|")
+          .map((c) => c.trim());
+        // A literal pipe inside summary/artifacts only shifts the trailing columns, so keep the
+        // five fixed leading fields and re-join any overflow into summary (artifacts is dropped).
+        return {
+          timestamp: cells[0] ?? "",
+          agent: cells[1] ?? "",
+          command: cells[2] ?? "",
+          target: cells[3] ?? "",
+          verdict: cells[4] ?? "",
+          summary: cells.length > 6 ? cells.slice(5, cells.length - 1).join(" | ") : (cells[5] ?? ""),
+        };
+      });
+    entries.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    return entries.slice(-n).reverse();
   }
 
   stats(): FrameworkStats {

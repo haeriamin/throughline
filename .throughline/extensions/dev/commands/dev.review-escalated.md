@@ -1,13 +1,13 @@
 # /dev.review-escalated
 
 **Agents**: Orchestrator (drives) + human (decides) + Archivist (records)
-**Reads**: `work-queue/escalated/**`, related specs/reports, `wiki/exception-registry.md`
-**Writes**: `wiki/exception-registry.md` (Archivist), queue moves (Orchestrator); append to `wiki/log.md`
+**Reads**: the global `work-queue/escalated/**` live items and each target's escalation reports (`<target>/.throughline/work-queue/escalated/<slice>-escalation.md`), related `<target>/.throughline/specs/**` and reports, `wiki/exception-registry.md` + `<target>/.throughline/wiki/exception-registry.md`
+**Writes**: `<target>/.throughline/wiki/exception-registry.md` for this-target/this-slice decisions (global-scoped decisions go to the framework `wiki/exception-registry.md`) (Archivist), global live-queue moves (Orchestrator); append to the framework `wiki/log.md`
 **Never writes**: target source, `/standards/**`, `/exemplars/**`
 
 ## Preconditions
 
-- At least one artifact in `work-queue/escalated/`. None → report empty state and stop.
+- At least one escalation pending — a live item in the global `work-queue/escalated/` (with its report at `<target>/.throughline/work-queue/escalated/<slice>-escalation.md`). None → report empty state and stop.
 
 ## Steps
 
@@ -18,7 +18,8 @@
      question(s), options considered, and the agent's recommendation with confidence.
    - **Wait for the human decision.** Never decide on the human's behalf — that is the
      entire point of escalation (Principle V).
-3. Record each decision in `wiki/exception-registry.md`:
+3. Record each decision in `<target>/.throughline/wiki/exception-registry.md` (a `global`-scoped
+   decision is promoted to the framework `wiki/exception-registry.md`):
    ```markdown
    ## EXC-NNN: <title>
    **Date**: ... | **Slice**: NNN-<slice> | **Target**: <id>
@@ -27,10 +28,12 @@
    **Scope**: this-slice-only | this-target | global
    **Follow-up**: <exemplar to curate / standard to amend / none>
    ```
-4. Resume the pipeline per decision: move the queue item (escalated → in-progress or
-   completed or abandoned), re-invoke the blocked command with the decision as context.
+4. Resume the pipeline per decision: move the global live work item (escalated → in-progress;
+   or, when the decision closes the slice, clear the live item and write the durable record to
+   `<target>/.throughline/work-queue/completed/<slice>.md`; or abandoned), re-invoke the blocked
+   command with the decision as context.
 5. If the decision implies a standards change or new exemplar → create the follow-up
-   entry in `review-reports/recommendations.md` for human curation.
+   entry in `audit/recommendations.md` for human curation.
 6. Append to `wiki/log.md` (one entry per resolved escalation).
 
 ## Exit Criteria

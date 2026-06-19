@@ -39,7 +39,7 @@ A **multi-agent, spec-driven software development platform** running inside VS C
 
 | Principle | Implementation |
 |-----------|---------------|
-| **Spec-driven** | Every slice has a `specs/NNN-*` folder with `spec.md`, `plan.md`, `tasks.md` (+ `design.md` for HIGH complexity). No code change without a slice. |
+| **Spec-driven** | Every slice has a `<target>/.throughline/specs/NNN-*` folder with `spec.md`, `plan.md`, `tasks.md` (+ `design.md` for HIGH complexity). No code change without a slice. |
 | **Constitution-bound** | `.throughline/memory/constitution.md` is the supreme law; all agents, prompts, and hooks defer to it. |
 | **Standalone, multi-project** | Framework state and knowledge live here; code lives at registered external paths. Knowledge compounds across projects. |
 | **Autonomy first, within bounds** | Agents act without asking inside their confidence band; below it, they escalate. |
@@ -86,19 +86,41 @@ Amendment process: `/throughline.constitution` → semantic version bump → `wi
 
 See `docs/02-concepts.md §Repository layout` for the full tree. Key invariants:
 
-| Path | Writers | Readers |
-|------|---------|---------|
-| `/standards/**` | Humans only | All agents |
-| `/exemplars/**` | Humans only | All agents |
-| `/wiki/**` (excl. log) | Archivist; Auditor recommends only | All agents |
-| `/wiki/log.md` | All agents (append-only) | All agents |
-| `/specs/**` | Spec workflow agents; Architect | All agents |
-| `/targets/**` | Orchestrator (via `/dev.target`) | All agents |
-| `/work-queue/**` | Orchestrator; Analyst (analyses) | All agents |
-| `/review-reports/**` | Reviewer, Tester, Auditor | All agents |
-| `<target>/**` | Implementer (source + `.throughline/CHANGELOG.md`), Tester (tests), Orchestrator (changelog verdict stamp) — inside an active slice only | Analyst, Reviewer, Auditor |
+**Topology — two homes.** The framework repo is the portable *brain*: shareable rules, compiled
+knowledge, and the live cross-target queue. Each registered codebase carries its own SDD
+*provenance* under `<target>/.throughline/` — the specs, reports, decision records, and target-local
+rules for that codebase, committed on the slice branch so they travel with the code. Target
+specifics never accumulate in the shared framework, so one framework instance safely serves many
+targets (see §11.7).
 
-Hooks at `.github/hooks/scripts/validate-immutable-paths.*` and `.claude/hooks/validate-immutable-paths.*` enforce the read-only paths at the tool-call boundary (wired per-OS by `tools/setup-hooks.*`; see §10.1).
+**Placement rule.** What the framework uses *globally* — across every target — stays in the
+framework root. What belongs to one project lives under that project's `<target>/.throughline/`.
+The test: does the engine read or write it for all targets, or only one? Global → root;
+single-target → target-side. (So `specs/` and per-slice `review-reports/` are target-side, while
+the live `work-queue/` and the `portfolio-summary.md` roll-up stay global.)
+
+**The boundary is one-way.** Target *state* never leaks into the shared framework, but target
+*lessons* do — by design. The Auditor reads each target's `<target>/.throughline/review-reports/`,
+rolls the cross-target signal up into the global `audit/portfolio-summary.md`, and writes
+`recommendations.md`; from there a human curates durable rules into `/standards/` + `/exemplars/`
+and the Archivist folds recurring patterns into the global `wiki/`. Experience earned on one target
+becomes knowledge that grounds the next — the framework learns from its targets without storing
+their specifics.
+
+| Path | Home | Writers | Readers |
+|------|------|---------|---------|
+| `/standards/**`, `/exemplars/**` | framework | Humans only (org seeds) | All agents |
+| `/wiki/standards-summary.md`, `/wiki/pattern-library.md` | framework | Archivist | All agents |
+| `/wiki/decision-registry.md`, `/wiki/exception-registry.md` (global-scoped entries only) | framework | Archivist; Auditor recommends | All agents |
+| `/wiki/log.md` (framework-level events: ingest, register, audit, amendments) | framework | All agents (append-only) | All agents |
+| `/targets/**` | framework | Orchestrator (via `/dev.target`) | All agents |
+| `/work-queue/{pending,in-progress}/**` (live queue, cross-target, target-qualified) | framework | Orchestrator; Analyst (analyses) | All agents |
+| `/audit/{portfolio-summary,recommendations}.md` (global audit roll-up) | framework | Auditor | All agents |
+| `<target>/.throughline/{specs,review-reports,work-queue/{completed,escalated,backups},wiki,CHANGELOG.md}` | target | the slice's agents, inside an active slice | All agents |
+| `<target>/.throughline/standards/**`, `<target>/.throughline/exemplars/**` | target | Humans only (target-local; override org seeds by rule-id) | All agents |
+| `<target>/**` (source + tests) | target | Implementer (source), Tester (tests) — inside an active slice only | Analyst, Reviewer, Auditor |
+
+Hooks at `.github/hooks/scripts/validate-immutable-paths.*` and `.claude/hooks/validate-immutable-paths.*` enforce the read-only paths — the framework's `/standards/` + `/exemplars/` and each target's `.throughline/standards/` + `.throughline/exemplars/` — at the tool-call boundary (wired per-OS by `tools/setup-hooks.*`; see §10.1).
 
 ---
 
@@ -118,6 +140,8 @@ lint_command: "npm run lint"
 build_command: "npm run build"
 complexity_class: MEDIUM          # LOW | MEDIUM | HIGH | CRITICAL (default for slices)
 changelog: on                     # on | off — maintain <target>/.throughline/CHANGELOG.md
+throughline_dir: .throughline     # where this target's SDD provenance lives (relative to target root)
+commit_artifacts: on              # on | off — commit <target>/.throughline/ SDD files on the slice branch (off → gitignored)
 conventions: |
   Repo-specific notes that override nothing but inform everything.
 exceptions: []                    # ids from wiki/exception-registry.md that apply here
@@ -125,7 +149,9 @@ status: active                    # active | paused | archived
 registered: 2026-06-09
 ```
 
-**Target-side change record**: unless `changelog: off`, every slice that changes a target writes a human-readable entry to `<target>/.throughline/CHANGELOG.md` on the `sdd/<slice>` branch (so it merges atomically with the change and travels with the code). The Implementer adds the entry during `/dev.implement` (`Status: PENDING REVIEW`, with files + cited spec/standards); the Orchestrator stamps the terminal verdict at slice close. This is the only framework artifact written *inside* the target — everything else (specs, reports, decision records) stays in the framework repo.
+**Target-side SDD provenance**: a slice's full record lives under `<target>/.throughline/` (default; set by `throughline_dir`) on the `sdd/<slice>` branch, so it merges atomically with the change and travels with the code: `specs/NNN-<slice>/` (spec, plan, design, tasks), `review-reports/` (test + review evidence), the completed/escalated work item, and a human-readable `CHANGELOG.md` entry. The Implementer writes the decision records + CHANGELOG during `/dev.implement`; the Orchestrator stamps the terminal verdict at slice close. With `commit_artifacts: off`, the `.throughline/` SDD files are gitignored in the target (a local working record, not in the product's history). Slice numbering is **per target** (each target's `.throughline/specs/` starts at `001`).
+
+**Target-local standards & exemplars (append/override)**: a target may carry its own `<target>/.throughline/standards/` and `.throughline/exemplars/`, human-curated like the org seeds. They extend the framework's by rule-id — a target rule with an existing id overrides the org rule for that target; new ids append. Retrieval (the `standards-retrieval` / `pattern-matcher` / `exemplar-retrieval` skills) merges framework + target-local with the target winning, and `/dev.ingest-standards <id>` / `/dev.ingest-exemplars <id>` compile a target-scoped delta into `<target>/.throughline/wiki/` — never into the shared global wiki, so nothing leaks across targets.
 
 `/dev.target register <path>` creates this entry, probes the project (stack detection, git status, test runner), and generates:
 
@@ -146,7 +172,7 @@ Each development slice is one Throughline feature:
 
 ```
 /throughline  "Add cursor pagination to my-app's orders endpoint"
-  ↓                                creates specs/NNN-orders-pagination/spec.md
+  ↓                                creates <target>/.throughline/specs/NNN-orders-pagination/spec.md
                                    (template: spec-template.md; records Target)
 /throughline.clarify
   ↓                                resolves [NEEDS CLARIFICATION] markers (max 3)
@@ -208,7 +234,7 @@ Deep target-codebase understanding. Produces structured analysis reports. Never 
 
 ### 6.4 ArchitectAgent
 
-Design authority for HIGH/CRITICAL slices (and on demand). Produces `specs/NNN-*/design.md` (component design, interfaces, data flow) and Architecture Decision Records indexed in `wiki/decision-registry.md`. Never edits source.
+Design authority for HIGH/CRITICAL slices (and on demand). Produces `<target>/.throughline/specs/NNN-*/design.md` (component design, interfaces, data flow) and Architecture Decision Records indexed in `<target>/.throughline/wiki/decision-registry.md` (global-scoped ADRs are promoted to the framework `wiki/decision-registry.md`). Never edits source.
 
 ### 6.5 ImplementerAgent
 
@@ -217,8 +243,8 @@ Autonomous code-writing engine. Works only at the registered target path, only i
 **Implementation Decision Record** (one per task):
 ```markdown
 ### Task: T00N <name>
-- Spec requirement: specs/NNN-<slice>/spec.md §FR-X
-- Design basis: specs/NNN-<slice>/design.md §<n> (or "n/a — LOW complexity")
+- Spec requirement: <target>/.throughline/specs/NNN-<slice>/spec.md §FR-X
+- Design basis: <target>/.throughline/specs/NNN-<slice>/design.md §<n> (or "n/a — LOW complexity")
 - Standard clause: standards/<file>.md §<RULE-ID>
 - Exemplar basis: exemplars/<path> (or "none exists — pattern-matcher confirmed")
 - Files changed: [...]
@@ -227,7 +253,7 @@ Autonomous code-writing engine. Works only at the registered target path, only i
 
 ### 6.6 TesterAgent
 
-Test authoring and execution at the target. Writes/updates tests covering changed behavior, runs the target's `test_command`, records results in `review-reports/<target>/<slice>-tests.md`. Never alters non-test source files.
+Test authoring and execution at the target. Writes/updates tests covering changed behavior, runs the target's `test_command`, records results in `<target>/.throughline/review-reports/<slice>-tests.md`. Never alters non-test source files.
 
 ### 6.7 ReviewerAgent
 
@@ -235,7 +261,7 @@ Gatekeeper. Independently re-reads standards from `/standards/` (not the wiki su
 
 ### 6.8 AuditorAgent
 
-Portfolio-wide quality. Aggregates review reports across targets, identifies systemic failure patterns, surfaces exemplar gaps. Read-only over source; writes to `/review-reports/` and produces recommendations for the Archivist.
+Portfolio-wide quality. Aggregates the per-target review reports (each target's `<target>/.throughline/review-reports/`), identifies systemic failure patterns, surfaces exemplar gaps. Read-only over source; writes the global roll-up (`portfolio-summary.md` + `recommendations.md`) to the framework `/audit/` and produces recommendations for the Archivist.
 
 ---
 
@@ -257,17 +283,19 @@ The fourteen commands:
 | `/dev.ingest-standards` | Archivist | `wiki/standards-summary.md`, concept pages, log |
 | `/dev.ingest-exemplars` | Archivist | `wiki/pattern-library.md`, concept pages, log |
 | `/dev.ideate` | Analyst | `work-queue/pending/<topic>-ideation.md`, log — read-only pre-spec brainstorming; explores options/trade-offs/risks, recommends a direction, builds nothing |
-| `/dev.analyze` | Analyst | `work-queue/in-progress/<slice>-analysis.md`, log |
-| `/dev.design` | Architect | `specs/NNN-*/design.md`, `wiki/decision-registry.md` entry, log |
-| `/dev.scaffold` | Implementer | target project skeleton (greenfield), scaffold report, log |
-| `/dev.implement` | Implementer | target source on branch `sdd/<slice>`, Decision Records, `<target>/.throughline/CHANGELOG.md` entry, log |
-| `/dev.test` | Tester | target test files, `review-reports/<target>/<slice>-tests.md`, log |
-| `/dev.review` | Reviewer | `review-reports/<target>/<slice>-review.md`, log |
-| `/dev.audit` | Auditor | `review-reports/portfolio-summary.md`, recommendations, log |
+| `/dev.analyze` | Analyst | `<target>/.throughline/specs/NNN-<slice>/analysis.md` (out-of-band bulk scans → `work-queue/pending/`), log |
+| `/dev.design` | Architect | `<target>/.throughline/specs/NNN-*/design.md`, `<target>/.throughline/wiki/decision-registry.md` entry, log |
+| `/dev.scaffold` | Implementer | target project skeleton (greenfield), `<target>/.throughline/specs/NNN-<slice>/scaffold.md`, log |
+| `/dev.implement` | Implementer | target source on branch `sdd/<slice>`, Decision Records in `<target>/.throughline/specs/NNN-<slice>/implementation.md`, `<target>/.throughline/CHANGELOG.md` entry, log |
+| `/dev.test` | Tester | target test files, `<target>/.throughline/review-reports/<slice>-tests.md`, log |
+| `/dev.review` | Reviewer | `<target>/.throughline/review-reports/<slice>-review.md`, log |
+| `/dev.audit` | Auditor | `audit/portfolio-summary.md`, recommendations, log |
 | `/dev.lint-wiki` | Archivist (read-only) | stdout / optional `wiki/_lint-report.md`, log |
-| `/dev.review-escalated` | Orchestrator + human + Archivist | `wiki/exception-registry.md`, queue moves, log |
+| `/dev.review-escalated` | Orchestrator + human + Archivist | `<target>/.throughline/wiki/exception-registry.md` (this-target/slice scope; global-scoped → framework registry), queue moves, framework `wiki/log.md` |
 
 Each command's runbook in `commands/dev.<name>.md` defines preconditions, steps, exit criteria, and failure modes. Agent files are thin wrappers that adopt the persona and follow the runbook.
+
+Throughout the table, *log* means the target's slice log (`<target>/.throughline/wiki/log.md`) for slice-scoped commands, and the framework `wiki/log.md` for framework-level commands (`/dev.target`, `/dev.ingest-standards`, `/dev.ingest-exemplars`, `/dev.audit`, `/dev.lint-wiki`, and escalation decisions).
 
 ---
 
@@ -458,16 +486,17 @@ Auditor tracks **exemplar gaps** — pattern classes needed ≥ 3 times without 
 
 ### 11.7 Multi-target scoping
 
-The wiki is shared across all registered targets **by design** — that is the knowledge-compounding mechanism (§16.3). Scoping keeps sharing safe:
+The wiki's **shareable** core is global across all registered targets **by design** — that is the knowledge-compounding mechanism (§16.3). Everything **target-specific** lives under that target's `.throughline/wiki/`. Scoping keeps sharing safe:
 
-| Artifact | Scoping |
-|----------|---------|
-| `standards-summary.md`, `pattern-library.md` | Global (org-wide law and reusable patterns; stack fit handled at retrieval time) |
-| `decision-registry.md`, `log.md` | Per-entry `Target` column |
-| `exception-registry.md` | Per-entry `Scope: this-slice-only \| this-target \| global` |
-| `concepts/*` | Optional `**Scope**: target:<id>` header (default `global`); agents MUST ignore pages scoped to a different target (Principle II) |
+| Artifact | Home | Scoping |
+|----------|------|---------|
+| `standards-summary.md`, `pattern-library.md` | framework `/wiki/` | Global org-wide law + reusable patterns (stack fit at retrieval) |
+| `decision-registry.md`, `exception-registry.md` | framework `/wiki/` holds **global-scoped** entries; **this-target / this-slice** entries live in `<target>/.throughline/wiki/` | by where written |
+| `log.md` | split: framework `/wiki/log.md` = framework-level events; `<target>/.throughline/wiki/log.md` = that target's slice events | per home |
+| target standards / pattern deltas | `<target>/.throughline/wiki/` | this-target only |
+| `concepts/*` | global in framework `/wiki/concepts/`; target concepts in `<target>/.throughline/wiki/concepts/` | `**Scope**` header |
 
-`/dev.lint-wiki` check 9 enforces scope integrity. **Confidentiality boundaries are not a scoping problem**: targets belonging to different clients/employers must live in separate framework instances (fork per boundary) — the pattern library, exception registry, and log would otherwise leak engineering knowledge across the boundary.
+`/dev.lint-wiki` check 9 enforces scope integrity. **Confidentiality**: because every target-specific artifact (specs, reports, decision records, exceptions, target standards, and the per-target log) lives under that target's `.throughline/` and never enters the shared framework wiki, a single framework instance can serve targets from different clients/employers without cross-leak. Only genuinely org-wide knowledge (the seed standards/exemplars, their global summaries, and global-scoped ADRs/exceptions) is shared — the knowledge-compounding mechanism (§16.3). Separate framework forks per boundary remain available for stricter isolation but are no longer required just to prevent leakage.
 
 ---
 
@@ -497,13 +526,13 @@ Each task is one logical unit of behavior, independently testable and reversible
 ```text
 /* ============================================================
    DEV-STATUS: PARTIAL
-   Requirement: specs/NNN-<slice>/spec.md §FR-X
+   Requirement: <target>/.throughline/specs/NNN-<slice>/spec.md §FR-X
    Reason: <why this could not be completed confidently>
    Confidence: 0.58 (below threshold)
    Standard: standards/<file>.md §<RULE-ID> applies
    Wiki: [[wiki/concepts/<relevant-page>]]
    Action Required: Human review before finalizing
-   Logged: work-queue/escalated/<slice>-escalation.md
+   Logged: <target>/.throughline/work-queue/escalated/<slice>-escalation.md
    ============================================================ */
 ```
 
@@ -512,7 +541,7 @@ Each task is one logical unit of behavior, independently testable and reversible
 ### 12.4 Rollback safety (Principle VI)
 
 - Git targets: all work on branch `sdd/<slice-id>`; rollback = delete branch. Never commit to default branch; never push without human instruction.
-- Non-git targets: originals copied to `work-queue/backups/<slice-id>/` before modification; rollback = restore copies.
+- Non-git targets: originals copied to `<target>/.throughline/work-queue/backups/<slice-id>/` before modification; rollback = restore copies.
 - Every implementation report documents the exact rollback procedure.
 
 ### 12.5 Forbidden operations (Implementer)
@@ -553,11 +582,11 @@ FAIL → return to Implementer with itemized reasons; max 2 retries; then escala
 
 ### 13.3 Test evidence
 
-Reviewer never trusts "tests pass" claims — it requires the Tester's report (`review-reports/<target>/<slice>-tests.md`) containing the actual command, exit code, and summary output. A missing or stale test report forces `test_evidence = 0`.
+Reviewer never trusts "tests pass" claims — it requires the Tester's report (`<target>/.throughline/review-reports/<slice>-tests.md`) containing the actual command, exit code, and summary output. A missing or stale test report forces `test_evidence = 0`.
 
 ### 13.4 Portfolio dashboard
 
-Auditor writes `review-reports/portfolio-summary.md` with verdict counts per target, top systemic issues, exemplar gaps, and recommended wiki updates. The VS Code dashboard extension renders this live.
+Auditor writes `audit/portfolio-summary.md` with verdict counts per target, top systemic issues, exemplar gaps, and recommended wiki updates. The VS Code dashboard extension renders this live.
 
 ---
 
@@ -657,13 +686,13 @@ Daily LLM cost is dominated by always-loaded context, so the framework keeps it 
 
 **Views** (activity bar container "SDD Dashboard"):
 - **Targets** — registered targets with status, stack, path (click to open `targets/<id>.yml`).
-- **Slices** — every `specs/NNN-*` with lifecycle phase (Specified → Clarified → Planned → Tasked → Implementing → Done) and task progress from `tasks.md` checkboxes.
-- **Work Queue** — pending / in-progress / completed / escalated items.
-- **Reports** — review + test reports grouped by target, with verdict badges.
+- **Slices** — every slice under each target's `<target>/.throughline/specs/NNN-*` with lifecycle phase (Specified → Clarified → Planned → Tasked → Implementing → Done) and task progress from `tasks.md` checkboxes.
+- **Work Queue** — the live `work-queue/` (pending / in-progress, and the escalated lane) plus each target's `.throughline/work-queue/` (completed / escalated records).
+- **Reports** — each target's `.throughline/review-reports/` plus the framework's portfolio roll-ups, grouped by target, with verdict badges.
 
 **Dashboard webview** (`SDD: Open Dashboard`): summary cards (targets, active slices, escalations), verdict distribution, slice pipeline table, recent `wiki/log.md` entries.
 
-**Mechanics**: a `FrameworkModel` parses the framework's plain-text artifacts (no database — the repo *is* the database), `FileSystemWatcher`s refresh on change, a status-bar item shows the escalation count. Framework root resolution: `sddDashboard.frameworkRoot` setting → else the first workspace folder containing `.throughline/memory/constitution.md` (so it works in the multi-root target workspaces generated by `/dev.target`).
+**Mechanics**: a `FrameworkModel` parses the framework's plain-text artifacts plus each registered target's `.throughline/` provenance (no database — the repos *are* the database), `FileSystemWatcher`s refresh on change, a status-bar item shows the escalation count from the framework's `work-queue/escalated/` lane. Framework root resolution: `sddDashboard.frameworkRoot` setting → else the first workspace folder containing `.throughline/memory/constitution.md` (so it works in the multi-root target workspaces generated by `/dev.target`).
 
 Build/run: see `tools/dashboard/README.md`.
 

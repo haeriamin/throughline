@@ -49,7 +49,7 @@ Before you rely on something, check which row it is in.
 - **Proven**: it runs from start to finish (two example tasks). In a 3-task side-by-side test
   against a plain one-shot, the review step caught **a real bug in all three** — including a
   release candidate treated as newer than the final release, and a money split that loses a
-  cent. Each plain version had passed its own tests. See [`docs/validation-runs/`](docs/validation-runs/).
+  cent. Each plain version had passed its own tests.
 - **Not proven**: three tasks is not a large test, and all three had tricky edge cases on
   purpose (a simple task gives the review step nothing to find). We have not measured speed
   or cost. And the "two checkers catch more" idea is untested, because it was one model

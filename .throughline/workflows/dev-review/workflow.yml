@@ -29,7 +29,7 @@ steps:
     integration: "{{ inputs.integration }}"
     input:
       args: "{{ inputs.slice }}"
-    description: "Independent Reviewer in a fresh context; reads standards from source and cites findings into review-reports/."
+    description: "Independent Reviewer in a fresh context; reads standards from source and cites findings into the target's <target>/.throughline/review-reports/."
 
   - id: review-gate
     type: gate

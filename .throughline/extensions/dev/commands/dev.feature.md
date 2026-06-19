@@ -1,7 +1,7 @@
 # /dev.feature
 
 **Agent**: Orchestrator (drives; delegates every phase to its owning persona)
-**Reads/Writes**: only through the phase commands it invokes, plus `work-queue/**` state moves, `wiki/log.md` appends, and the verdict stamp on `<target>/.throughline/CHANGELOG.md` at slice close (step 11)
+**Reads/Writes**: only through the phase commands it invokes, plus global `work-queue/**` live-work-item state moves, `<target>/.throughline/wiki/log.md` appends (slice lifecycle), and the verdict stamp on `<target>/.throughline/CHANGELOG.md` at slice close (step 11)
 **Never**: performs analysis/design/implementation/testing/review itself; merges or pushes (Principle VI)
 
 Single point of input for building software — a feature on an existing codebase, or a
@@ -73,11 +73,13 @@ ways: design becomes mandatory (step 5) and scaffold runs before implementation 
 0. **Bootstrap** (Principle II — full sequence). Create the work item in
    `work-queue/pending/` from `.throughline/templates/work-item-template.md` (status: PENDING),
    then move to `in-progress/` as phases start.
-1. **Specify** — `/throughline.specify "<description> (target: <id>)"`. Allocate the slice
-   number as **max(existing `specs/NNN-*` and `work-queue/**/NNN-*`) + 1**, zero-padded — scan
-   both `specs/` and every `work-queue/` lane so a concurrent in-progress slice can't grab the
-   same `NNN` (the parallelism cap allows up to 3). If the chosen `specs/NNN-*` already exists,
-   bump and retry.
+1. **Specify** — `/throughline.specify "<description> (target: <id>)"`. Slice numbers are
+   **per target**: allocate as **max(existing `<target>/.throughline/specs/NNN-*` and this
+   target's `<target>-NNN-*` live items across every `work-queue/` lane) + 1**, zero-padded —
+   scan both the target's `.throughline/specs/` and the global `work-queue/` lanes (filtered to
+   this target's qualifier) so a concurrent in-progress slice can't grab the same `NNN` (the
+   parallelism cap allows up to 3). If the chosen `<target>/.throughline/specs/NNN-*` already
+   exists, bump and retry. The global live work item is target-qualified `<target>-NNN-<slice>`.
 2. **Clarify** — `[NEEDS CLARIFICATION]` markers present → `/throughline.clarify` and **wait
    for the user's answers**. Constitutional; `--express` cannot skip it.
 3. **Spec gate** *(skipped by `--express`)* — present a 5-line spec summary
@@ -115,7 +117,7 @@ ways: design becomes mandatory (step 5) and scaffold runs before implementation 
     - Artifact links: spec, plan, design (if any), tasks, scaffold report (greenfield),
       implementation report, test report, review report
     - PARTIAL/escalation count; flagged items if CONDITIONAL_PASS
-    - `wiki/log.md` entries appended
+    - `<target>/.throughline/wiki/log.md` entries appended
 
 ## Human Pauses (constitutional — never skipped)
 

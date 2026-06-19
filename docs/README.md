@@ -25,8 +25,5 @@ and the five ways to use the framework on each.
 **Before you adopt it**: [STATUS.md](../STATUS.md) — an honest look at how ready it is, what
 is enforced vs. only instructed, and what has not been tested yet.
 
-**See it run**: [validation-runs/](validation-runs/) — real runs with the files, results,
-and bugs they found.
-
 **Other docs**: [COMMANDS.md](../COMMANDS.md) — every command on one page ·
 [ARCHITECTURE.md](../ARCHITECTURE.md) — the deeper design · [CONTRIBUTING.md](../CONTRIBUTING.md) — rules for changes.

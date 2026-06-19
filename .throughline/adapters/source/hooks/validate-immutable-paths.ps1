@@ -19,11 +19,13 @@ foreach ($field in @("file_path", "path", "notebook_path", "target", "destinatio
 if ($null -eq $filePath) { exit 0 }
 
 $normalized = $filePath.Replace('\', '/').TrimStart('.', '/')
+# Guards the framework org seeds (standards/ + exemplars/) AND each target's local overrides
+# (<target>/.throughline/standards|exemplars) — both contain the /standards/ or /exemplars/ segment.
 foreach ($prefix in @("standards/", "exemplars/")) {
     if ($normalized.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase) -or
         $normalized.ToLower().Contains("/$prefix")) {
         Write-Output "BLOCKED: Attempted write to immutable path: $filePath"
-        Write-Output "The /standards/ and /exemplars/ directories are READ ONLY (Constitution Principle I)."
+        Write-Output "standards/ + exemplars/ (framework org seeds) and <target>/.throughline/standards|exemplars (target-local overrides) are READ ONLY (Constitution Principle I)."
         Write-Output "Agents must never modify source material. Add new files via human curation only."
         exit 2
     }

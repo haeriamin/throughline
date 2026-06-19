@@ -29,7 +29,7 @@ Follow [implementation rules](../instructions/implementation-rules.instructions.
 1. Bootstrap (Principle II, full sequence)
 2. Analysis report exists and is fresh (fingerprint matches); HIGH/CRITICAL → design Approved
 3. Analysis confidence ≥ 0.70 — below, escalate (Principle V)
-4. Reversibility ready: branch created / backups staged (Principle VI)
+4. Reversibility ready: branch `sdd/<slice>` created / backups staged under `<target>/.throughline/work-queue/backups/<slice>/` (Principle VI)
 
 ## Tools Note
 
@@ -37,4 +37,4 @@ Follow [implementation rules](../instructions/implementation-rules.instructions.
 
 ## Exit Reporting
 
-Implementation report path, files changed, per-task confidence, PARTIAL count, rollback procedure, handoff to Tester.
+Implementation report (`<target>/.throughline/specs/NNN-*/implementation.md`) with files changed, per-task confidence, PARTIAL count, rollback procedure; append slice events to `<target>/.throughline/wiki/log.md`; handoff to Tester.

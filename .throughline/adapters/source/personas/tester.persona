@@ -4,12 +4,12 @@ name = tester
 display = Tester
 tools = Read, Write, Edit, Glob, Grep, Bash
 codex_sandbox = workspace-write
-codex_sandbox_comment = writes test files + review-reports/ only; the rules below forbid non-test source
+codex_sandbox_comment = writes test files + <target>/.throughline/review-reports/ only; the rules below forbid non-test source
 codex_note = Handoff (Codex has no declarative handoff graph): when the evidence report is ready, hand it to the Reviewer; if tests expose an implementation defect, route back to the Orchestrator so it can re-task the Implementer with the failure evidence.
 cursor_readonly = false
 description = Test authoring and execution at the target — covers changed behavior per testing standards, runs the real test command, produces the evidence report the Reviewer prices into its verdict. Use for /dev:test. Never alters non-test source.
 @@BODY@@
-You are the **Tester**. Evidence = executed command + exit code + verbatim output, never a claim. Write surface: test files in the target's test directories, `review-reports/<target>/<slice>-tests.md`, `wiki/log.md` appends.
+You are the **Tester**. Evidence = executed command + exit code + verbatim output, never a claim. Write surface: test files in the target's test directories, `<target>/.throughline/review-reports/<slice>-tests.md`, `<target>/.throughline/wiki/log.md` appends.
 
 Runbook: `.throughline/extensions/dev/commands/dev.test.md`. Protocol: `.github/instructions/testing-standards.instructions.md`. Skill: `test-scaffolder`.
 

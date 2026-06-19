@@ -34,22 +34,22 @@ The text after `/throughline` **is** the slice description. Do not ask the user 
 
 2. **Generate a short name** (2–4 words, kebab-case, action-noun: "jwt-auth", "fix-payment-timeout").
 
-3. **Create the feature directory** by running the helper script:
-   - PowerShell: `.throughline/scripts/powershell/create-new-feature.ps1 -ShortName "<short-name>"`
-   - Bash: `.throughline/scripts/bash/create-new-feature.sh <short-name>`
-   - The script copies `.throughline/templates/spec-template.md` to `specs/NNN-<short-name>/spec.md`, creates `checklists/`, and persists the path to `.throughline/feature.json`. One feature per invocation.
+3. **Create the feature directory** by running the helper script (pass the target id from step 1):
+   - PowerShell: `.throughline/scripts/powershell/create-new-feature.ps1 -Target "<target-id>" -ShortName "<short-name>"`
+   - Bash: `.throughline/scripts/bash/create-new-feature.sh <target-id> <short-name>`
+   - The script resolves the target's path + `throughline_dir` from `targets/<target-id>.yml`, copies `.throughline/templates/spec-template.md` to `<target>/.throughline/specs/NNN-<short-name>/spec.md`, creates `checklists/`, and persists the absolute path + target to `.throughline/feature.json`. One feature per invocation. Slice numbers are per target (`<target>/.throughline/specs/` starts at 001).
 
 4. **Write the spec** into SPEC_FILE preserving the template's section order:
    - Fill Target, User Scenarios, Functional Requirements (each testable), Success Criteria (measurable, technology-agnostic, user-focused), Scope & Boundaries, Assumptions.
    - Make informed guesses for gaps; document them in Assumptions.
    - Mark at most **3** `[NEEDS CLARIFICATION: specific question]` — only where scope/security/UX materially forks and no reasonable default exists.
 
-5. **Validate** against `specs/NNN-*/checklists/requirements.md` (create from `.throughline/templates/checklist-template.md`):
+5. **Validate** against `<target>/.throughline/specs/NNN-*/checklists/requirements.md` (create from `.throughline/templates/checklist-template.md`):
    - Content: no implementation details; user/business focused; all mandatory sections done.
    - Requirements: testable, unambiguous, measurable criteria, bounded scope, assumptions recorded.
    - Fix failures and re-validate (max 3 iterations); remaining `[NEEDS CLARIFICATION]` → present each as a question table (Option | Answer | Implications) and wait for answers; update spec.
 
-6. **Report**: FEATURE_DIR, SPEC_FILE, target id, checklist results, readiness for `/throughline.clarify` or `/throughline.plan`. Append to `wiki/log.md`.
+6. **Report**: FEATURE_DIR, SPEC_FILE, target id, checklist results, readiness for `/throughline.clarify` or `/throughline.plan`. Append to `<target>/.throughline/wiki/log.md`.
 
 ## Guidelines
 

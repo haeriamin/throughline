@@ -3,7 +3,7 @@
 **Slice ID**: [NNN-short-name]
 **Target**: [target-id]
 **Spec**: [link to spec.md]
-**Analysis**: [link to work-queue/in-progress/<slice>-analysis.md — produced by /dev.analyze]
+**Analysis**: [link to <target>/.throughline/specs/[NNN-short-name]/analysis.md — produced by /dev.analyze]
 **Design**: [link to design.md, or "n/a — LOW/MEDIUM complexity"]
 **Created**: [DATE]
 

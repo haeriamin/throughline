@@ -18,7 +18,7 @@
 1. **Bootstrap** (Constitution Principle II, full sequence).
 2. **Map**: run `codebase-mapper` over the scope → module inventory, entry points, test layout, dependency edges.
 3. **Conventions**: detect naming, structure, and error-handling conventions actually used. These bind the Implementer wherever `/standards/` is silent — record them explicitly.
-4. **Patterns**: for each implementation need in the spec, run `pattern-matcher` against `wiki/pattern-library.md`. Record matched PAT ids AND unmatched needs (exemplar gaps).
+4. **Patterns**: for each implementation need in the spec, run `pattern-matcher` against `wiki/pattern-library.md` (and the active target's `.throughline/wiki/pattern-library.md` delta). Record matched PAT ids AND unmatched needs (exemplar gaps).
 5. **Risk**: enumerate risks with likelihood/impact — dependency fan-out, public contract changes, concurrency, data sensitivity.
 6. **Classify** complexity per ARCHITECTURE.md §12.1; justify the class against the criteria, not vibes.
 7. **Score** analysis confidence: requirements with a clear implementation path / total requirements, discounted for map ambiguity.

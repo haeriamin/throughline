@@ -1,9 +1,9 @@
 # /dev.implement
 
 **Agent**: Implementer
-**Reads**: `specs/NNN-*/{spec,plan,design,tasks}.md`, analysis report, `targets/<id>.yml`, `wiki/**`, `/standards/**` + `/exemplars/**` (via skills)
-**Writes**: target source on branch `sdd/<slice-id>` (or with backups for non-git targets); `<target>/.throughline/CHANGELOG.md` (the target-side change record, on the slice branch); `work-queue/in-progress/<slice>-implementation.md` (Decision Records); append to `wiki/log.md`
-**Never writes**: `/standards/**`, `/exemplars/**`, target CI/CD config or secrets, the target's default branch
+**Reads**: `<target>/.throughline/specs/NNN-*/{spec,plan,design,tasks}.md`, the analysis report (`<target>/.throughline/specs/NNN-*/analysis.md`), `targets/<id>.yml`, framework `wiki/**` + `<target>/.throughline/wiki/**`, `/standards/**` + `<target>/.throughline/standards/**` and `/exemplars/**` + `<target>/.throughline/exemplars/**` (via skills)
+**Writes**: target source on branch `sdd/<slice-id>` (or with backups under `<target>/.throughline/work-queue/backups/<slice-id>/` for non-git targets); `<target>/.throughline/CHANGELOG.md` (the target-side change record, on the slice branch); `<target>/.throughline/specs/NNN-*/implementation.md` (Decision Records); append to `<target>/.throughline/wiki/log.md`
+**Never writes**: `/standards/**`, `/exemplars/**` (framework or any target's `.throughline/standards|exemplars`), target CI/CD config or secrets, the target's default branch
 
 ## Preconditions
 
@@ -12,7 +12,7 @@
 - HIGH/CRITICAL → `design.md` exists with status `Approved`.
 - Analysis confidence ≥ 0.70 (Principle V). Below → escalate, don't implement.
 - Reversibility prepared (Principle VI): git target → on branch `sdd/<slice-id>`;
-  non-git target → `work-queue/backups/<slice-id>/` ready.
+  non-git target → `<target>/.throughline/work-queue/backups/<slice-id>/` ready.
 
 ## Steps
 
@@ -26,27 +26,29 @@
    - Apply the change. Record an **Implementation Decision Record**:
      ```markdown
      ### Task: T00N <name>
-     - Spec requirement: specs/NNN-<slice>/spec.md §FR-X
-     - Design basis: specs/NNN-<slice>/design.md §<n> (or "n/a — LOW/MEDIUM")
-     - Standard clause: standards/<file>.md §<RULE-ID>
-     - Exemplar basis: exemplars/<path> (or "none exists — pattern-matcher confirmed")
+     - Spec requirement: <target>/.throughline/specs/NNN-<slice>/spec.md §FR-X
+     - Design basis: <target>/.throughline/specs/NNN-<slice>/design.md §<n> (or "n/a — LOW/MEDIUM")
+     - Standard clause: standards/<file>.md §<RULE-ID> (org) or .throughline/standards/<file>.md §<RULE-ID> (target-local)
+     - Exemplar basis: exemplars/<path> (org) or .throughline/exemplars/<path> (target-local) (or "none exists — pattern-matcher confirmed")
      - Files changed: [...]
      - Confidence: 0.XX
      ```
      The standard clause MUST be a real rule id that exists in the source file (e.g.
-     `standards/engineering-standards.md §ENG-02`), copied from the file — never a
+     `standards/engineering-standards.md §ENG-02`, or `.throughline/standards/<file>.md §<ID>`
+     for a target-local rule), copied from the file — never a
      paraphrased or invented label. The Reviewer re-reads the clause from source and
      issues an automatic **FAIL for citation fraud** if it does not exist or does not
      apply (Principle III). If no clause governs the change, say so explicitly
      (`Standard clause: none — convention-only, see analysis`) rather than inventing one.
    - Mark the task checkbox done in `tasks.md`.
    - Cannot complete confidently → leave safe state + `DEV-STATUS: PARTIAL` annotation
-     (Principle IV), entry in `wiki/exception-registry.md`, continue with independent tasks.
+     (Principle IV), entry in `<target>/.throughline/wiki/exception-registry.md` (global-scoped
+     entries promote to the framework `wiki/exception-registry.md`), continue with independent tasks.
 4. Run the target's `lint_command` (if set); fix violations introduced by this slice.
 5. Forbidden at all times (ARCHITECTURE.md §12.5): behavior changes outside spec scope,
    new dependencies not named in the plan, test-surface reduction, comment/doc removal,
    CI/secrets edits.
-6. Write `work-queue/in-progress/<slice>-implementation.md`: all Decision Records,
+6. Write `<target>/.throughline/specs/NNN-<slice>/implementation.md`: all Decision Records,
    files-changed list, per-task confidence, rollback procedure, PARTIAL count.
 7. **Record the change in the target.** Create or append to `<target>/.throughline/CHANGELOG.md`
    (on the slice branch, so the entry merges atomically with the change). Newest entry first:
@@ -56,14 +58,14 @@
    **Date**: <UTC> | **Branch**: sdd/<slice-id> | **Status**: PENDING REVIEW
    - What changed: <1–3 lines, human-readable>
    - Files: <paths touched>
-   - Spec: specs/NNN-<slice>/spec.md · Standards: <RULE-IDs cited>
+   - Spec: <target>/.throughline/specs/NNN-<slice>/spec.md · Standards: <RULE-IDs cited>
    ```
    Create the `.throughline/` directory if absent (with a one-line `README` noting it is a
    framework-maintained record). This file is committed in the target — it is the change record
    that travels with the code. The Orchestrator stamps the final verdict here at slice close
    (see `dev.feature.md`); a standalone `/dev.implement` leaves it `PENDING REVIEW`. Skip only if
    the target sets `changelog: off` in `targets/<id>.yml`.
-8. Append to `wiki/log.md`. **Do not merge, do not push.** Hand off to `/dev.test`.
+8. Append to `<target>/.throughline/wiki/log.md`. **Do not merge, do not push.** Hand off to `/dev.test`.
 
 ## Exit Criteria
 

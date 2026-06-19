@@ -26,7 +26,7 @@ Follow [testing protocol](../instructions/testing-standards.instructions.md). Ru
 
 ## Output Contract
 
-`review-reports/<target>/<slice>-tests.md` with: exact command, exit code, pass/fail/skip counts, changed-behavior coverage table (COVERED/FAILING/MISSING), verbatim failure output, source fingerprint.
+`<target>/.throughline/review-reports/<slice>-tests.md` with: exact command, exit code, pass/fail/skip counts, changed-behavior coverage table (COVERED/FAILING/MISSING), verbatim failure output, source fingerprint. Append slice events to `<target>/.throughline/wiki/log.md`.
 
 ## Cardinal Rules
 

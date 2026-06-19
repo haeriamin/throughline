@@ -12,7 +12,7 @@ Turn the changed-behavior list into runnable test skeletons that fit the target'
 
 1. Read the target's test layout from the codebase map (`test_layout.framework`, `locations`) — the existing framework is law; never introduce a second one.
 2. For each behavior in the coverage list (FR/SC + Given/When/Then from the spec):
-   - Choose the layer per `standards/testing-standards.md`: unit (pure logic), integration (wiring/IO), e2e (only where an SC demands it).
+   - Choose the layer per `standards/testing-standards.md` (and any target-local `.throughline/standards/testing-standards.md` override): unit (pure logic), integration (wiring/IO), e2e (only where an SC demands it).
    - Locate the conventional test file (create alongside existing patterns: `__tests__/`, `*.spec.ts`, `tests/test_*.py`, …).
    - Emit a skeleton: descriptive behavior-named test, Arrange-Act-Assert sections, the Given/When/Then mapped into them, TODO markers ONLY inside assertions still needing values.
 3. Reuse existing fixtures/helpers/builders found in the test layout — duplicating a fixture is a finding.

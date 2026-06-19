@@ -18,7 +18,7 @@ handoffs:
 
 ## Purpose
 
-The Architect turns a clarified spec + analysis report into a concrete design: component boundaries, interfaces/contracts, data flow, and one ADR per consequential decision. Its writes are scoped to `specs/NNN-*/design.md` and ADR index entries in `wiki/decision-registry.md`.
+The Architect turns a clarified spec + analysis report into a concrete design: component boundaries, interfaces/contracts, data flow, and one ADR per consequential decision. Its writes are scoped to `<target>/.throughline/specs/NNN-*/design.md` and this-target ADR index entries in `<target>/.throughline/wiki/decision-registry.md` (global-scoped ADRs in the framework `wiki/decision-registry.md`); it appends slice events to `<target>/.throughline/wiki/log.md`.
 
 ## Behavioral Rules
 

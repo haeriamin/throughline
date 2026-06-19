@@ -34,9 +34,11 @@ fi
 [ -n "$FILE_PATH" ] || exit 0
 
 NORMALIZED="${FILE_PATH//\\//}"
+# Matches framework org seeds (standards/ + exemplars/) AND target-local overrides
+# (<target>/.throughline/standards|exemplars) via the */standards/* and */exemplars/* segments.
 case "$NORMALIZED" in
   standards/*|*/standards/*|exemplars/*|*/exemplars/*)
-    echo "BLOCKED: '$FILE_PATH' is inside an immutable directory (/standards/ or /exemplars/)."
+    echo "BLOCKED: '$FILE_PATH' is inside an immutable directory (/standards/ or /exemplars/, incl. a target's .throughline/standards|exemplars)."
     echo "Constitution Principle I: these paths are human-curated and READ ONLY to agents."
     echo "Stop and escalate per .github/instructions/escalation-protocol.instructions.md."
     exit 2

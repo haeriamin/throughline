@@ -36,7 +36,7 @@ first missing artifact.
 Full control at every step:
 
 ```bash
-/throughline:specify "Add cursor pagination to my-app's orders endpoint"   # → specs/NNN-*/spec.md
+/throughline:specify "Add cursor pagination to my-app's orders endpoint"   # → <target>/.throughline/specs/NNN-*/spec.md
 /throughline:clarify                                       # resolve [NEEDS CLARIFICATION]
 /throughline:plan        # → plan.md, grounded in /dev:analyze's report
 /dev:design          # only if HIGH/CRITICAL — design.md + ADRs, you approve

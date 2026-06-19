@@ -11,7 +11,7 @@ Surface the best curated reference implementations for the task at hand. Exempla
 ## Algorithm
 
 1. Parse the need: pattern class (e.g., "REST Pagination"), language(s), tags.
-2. Inventory `/exemplars/good/**` and `/exemplars/anti-patterns/**` via their `.meta.md` files (skip code files lacking metadata; report them).
+2. Inventory `/exemplars/good/**` and `/exemplars/anti-patterns/**` (framework) plus the active target's `.throughline/exemplars/**` via their `.meta.md` files (skip code files lacking metadata; report them). A target-local exemplar of the same class is ranked alongside the org ones.
 3. Score each exemplar:
 
 ### Scoring Dimensions
@@ -44,6 +44,7 @@ Surface the best curated reference implementations for the task at hand. Exempla
 ## Rules
 
 - Relevance < 0.60 → report a GAP; never stretch a weak exemplar into a basis (Principle III demands apposite citations).
+- Cite each exemplar by its source form — `exemplars/<path>` (org) or `.throughline/exemplars/<path>` (target-local).
 - `example_similarity` used in confidence scoring = the relevance of the exemplar actually cited.
 
 ## Usage Context

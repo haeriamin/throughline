@@ -37,12 +37,12 @@
     "commands": [
       {
         "command": "sdd.refresh",
-        "title": "SDD: Refresh",
+        "title": "Throughline: Refresh",
         "icon": "$(refresh)"
       },
       {
         "command": "sdd.openDashboard",
-        "title": "SDD: Open Dashboard",
+        "title": "Throughline: Open Dashboard",
         "icon": "$(dashboard)"
       }
     ],

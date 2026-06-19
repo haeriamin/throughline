@@ -4,7 +4,7 @@ import { FrameworkModel } from "./model";
 type Tone = "green" | "amber" | "red" | "blue" | "neutral";
 
 const ICONS = {
-  mark: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.4"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.4"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.4"/><path d="M17.25 13.5v7.5M13.5 17.25h7.5"/></svg>`,
+  mark: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18 L12 12.5 L19 7"/><circle cx="5" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="7" r="2.4" fill="currentColor" stroke="none"/></svg>`,
   target: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.6" fill="currentColor"/></svg>`,
   layers: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>`,
   alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4M12 17.5v.5"/></svg>`,
@@ -34,7 +34,7 @@ export class DashboardPanel {
       DashboardPanel.current.update(getModel());
       return;
     }
-    const panel = vscode.window.createWebviewPanel("sddDashboard", "SDD Dashboard", vscode.ViewColumn.One, {
+    const panel = vscode.window.createWebviewPanel("sddDashboard", "Throughline Dashboard", vscode.ViewColumn.One, {
       enableScripts: true,
     });
     DashboardPanel.current = new DashboardPanel(panel, getModel);
@@ -89,7 +89,7 @@ export class DashboardPanel {
     return this.shell(`
       <div class="topbar">
         <div class="brand"><div class="mark">${ICONS.mark}</div>
-          <div><h1>SDD Dashboard</h1><div class="sub">no framework detected</div></div></div>
+          <div><h1>Throughline Dashboard</h1><div class="sub">no framework detected</div></div></div>
       </div>
       <div class="panel"><div class="empty">${ICONS.inbox}
         <div>No framework root found.</div>
@@ -174,7 +174,7 @@ export class DashboardPanel {
     return this.shell(`
       <div class="topbar">
         <div class="brand"><div class="mark">${ICONS.mark}</div>
-          <div><h1>SDD Agent Framework</h1><div class="sub mono">${esc(model.root)}</div></div></div>
+          <div><h1>Throughline</h1><div class="sub mono">${esc(model.root)}</div></div></div>
         <button class="btn" id="refresh">${ICONS.refresh}<span>Refresh</span></button>
       </div>
 

@@ -10,31 +10,36 @@
 **Updated**: [DATE]
 **Input**: "[verbatim user description]"
 
-> Created by /dev.feature step 0 in `work-queue/pending/`, moved to `in-progress/` as phases
-> start, then to `completed/` or `escalated/` at close. File name is `[NNN-short-name].md`.
-> `/dev.lint-wiki` check 11 flags phase reports left in `in-progress/` after this item moves.
+> Created by /dev.feature step 0 in the global `work-queue/pending/`, moved to `in-progress/` as
+> phases start. The live file name is target-qualified — `<target>-[NNN-short-name].md` — so the
+> shared queue stays unambiguous across targets. At slice close a durable copy is written to
+> `<target>/.throughline/work-queue/completed/[NNN-short-name].md` and the global live item is
+> cleared; an escalated slice stays in the global `work-queue/escalated/` lane.
+> `/dev.lint-wiki` check 11 flags a closed slice whose live item was never cleared (no durable
+> target-side copy).
 
 ## Branch
 
 - Target branch: `sdd/[NNN-short-name]` (never the default branch; never pushed/merged by an agent)
 
-## Inline spec *(micro lane only — replaces the `specs/` folder)*
+## Inline spec *(micro lane only — replaces the target-side `specs/` folder)*
 
 [One paragraph: scope, the single functional requirement, success criteria, out-of-scope.
-Used only when Lane = micro; standard/deep lanes use `specs/[NNN-short-name]/spec.md` instead.]
+Used only when Lane = micro; standard/deep lanes use
+`<target>/.throughline/specs/[NNN-short-name]/spec.md` instead.]
 
 ## Phase artifacts
 
 | Phase | Artifact | Done |
 |-------|----------|:----:|
-| Spec | specs/[NNN-short-name]/spec.md | [ ] |
-| Plan | specs/[NNN-short-name]/plan.md | [ ] |
-| Design | specs/[NNN-short-name]/design.md (HIGH/greenfield only) | [ ] |
-| Tasks | specs/[NNN-short-name]/tasks.md | [ ] |
-| Analysis | work-queue/in-progress/[NNN-short-name]-analysis.md | [ ] |
-| Implementation | work-queue/in-progress/[NNN-short-name]-implementation.md | [ ] |
-| Tests | review-reports/[target]/[NNN-short-name]-tests.md | [ ] |
-| Review | review-reports/[target]/[NNN-short-name]-review.md | [ ] |
+| Spec | <target>/.throughline/specs/[NNN-short-name]/spec.md | [ ] |
+| Plan | <target>/.throughline/specs/[NNN-short-name]/plan.md | [ ] |
+| Design | <target>/.throughline/specs/[NNN-short-name]/design.md (HIGH/greenfield only) | [ ] |
+| Tasks | <target>/.throughline/specs/[NNN-short-name]/tasks.md | [ ] |
+| Analysis | <target>/.throughline/specs/[NNN-short-name]/analysis.md | [ ] |
+| Implementation | <target>/.throughline/specs/[NNN-short-name]/implementation.md | [ ] |
+| Tests | <target>/.throughline/review-reports/[NNN-short-name]-tests.md | [ ] |
+| Review | <target>/.throughline/review-reports/[NNN-short-name]-review.md | [ ] |
 
 ## Outcome
 

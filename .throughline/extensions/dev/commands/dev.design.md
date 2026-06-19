@@ -1,14 +1,14 @@
 # /dev.design
 
 **Agent**: Architect
-**Reads**: `specs/NNN-*/spec.md`, analysis report, `wiki/**`, `/standards/**` (via skill), target source (read-only)
-**Writes**: `specs/NNN-*/design.md`; ADR index entries in `wiki/decision-registry.md` (via Archivist-format `wiki-writer`); append to `wiki/log.md`
+**Reads**: `<target>/.throughline/specs/NNN-*/spec.md`, the analysis report (`<target>/.throughline/specs/NNN-*/analysis.md`), framework `wiki/**` + `<target>/.throughline/wiki/**`, `/standards/**` + `<target>/.throughline/standards/**` (via skill), target source (read-only)
+**Writes**: `<target>/.throughline/specs/NNN-*/design.md`; this-target ADR index entries in `<target>/.throughline/wiki/decision-registry.md` (global-scoped ADRs in the framework `wiki/decision-registry.md`; via Archivist-format `wiki-writer`); append to `<target>/.throughline/wiki/log.md`
 **Never writes**: target source, `/standards/**`, `/exemplars/**`
 
 ## Preconditions
 
 - Spec exists and is clarified (no `[NEEDS CLARIFICATION]` markers).
-- Analysis report exists in `work-queue/in-progress/` (run `/dev.analyze` first).
+- Analysis report exists at `<target>/.throughline/specs/NNN-*/analysis.md` (run `/dev.analyze` first).
 - Required for HIGH/CRITICAL complexity; optional otherwise.
 
 ## Steps
@@ -22,11 +22,12 @@
    - Data flow.
    - One ADR per consequential decision (alternatives + consequences + standard basis).
    - Security & failure analysis (mandatory at this complexity).
-4. Index each accepted ADR in `wiki/decision-registry.md`:
-   `| ADR-NNN | <title> | <slice> | <target> | Accepted | <date> | specs/NNN-*/design.md |`
+4. Index each accepted ADR in `<target>/.throughline/wiki/decision-registry.md` (promote a
+   global-scoped ADR to the framework `wiki/decision-registry.md`):
+   `| ADR-NNN | <title> | <slice> | <target> | Accepted | <date> | .throughline/specs/NNN-*/design.md |`
 5. List Open Questions; if any block tasking, mark the design `Draft` and route to
    `/throughline.clarify` or human review.
-6. Append to `wiki/log.md`.
+6. Append to `<target>/.throughline/wiki/log.md`.
 
 ## Exit Criteria
 
@@ -40,4 +41,4 @@
 - **Spec ambiguity discovered** → do not design around it; emit `[NEEDS CLARIFICATION]`
   back into the spec flow and stop.
 - **No compliant design exists under current standards** → escalate with the conflicting
-  clauses cited; candidate for `wiki/exception-registry.md`.
+  clauses cited; candidate for `<target>/.throughline/wiki/exception-registry.md` (or the framework registry if global-scoped).

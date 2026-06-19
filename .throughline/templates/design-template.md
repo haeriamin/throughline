@@ -44,7 +44,9 @@
 - **Consequences**: [positive and negative]
 - **Standard basis**: standards/<file>.md §<RULE-ID>
 
-*(Each accepted ADR is also indexed in `wiki/decision-registry.md` by the Archivist.)*
+*(Each accepted ADR is indexed by the Archivist in the target's
+`<target>/.throughline/wiki/decision-registry.md`; an ADR with global scope is also promoted to
+the framework `wiki/decision-registry.md`.)*
 
 ## Security & Failure Analysis *(mandatory for HIGH/CRITICAL)*
 

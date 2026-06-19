@@ -5,6 +5,19 @@ The constitution carries its own version; amendments are logged in `wiki/log.md`
 
 ## [Unreleased]
 
+### Changed
+- **Target-side SDD provenance (constitution 0.3.0)** — a slice's specs, reports, decision records,
+  completed/escalated work items, and any target-local `standards/`+`exemplars/` now live under
+  `<target>/.throughline/` and travel with the code on the slice branch. The framework keeps only the
+  shareable brain (org standards/exemplars + compiled summaries), the live cross-target work queue, and
+  the global audit roll-up; the operations log and the decision/exception registries split framework
+  (global-scoped) vs per-target. New `targets/<id>.yml` fields `throughline_dir` + `commit_artifacts`.
+  One framework instance can now serve many targets without cross-leak (ARCHITECTURE §11.7).
+- **Framework audit roll-up dir renamed `review-reports/` → `audit/` (constitution 0.3.1)** — the global
+  portfolio roll-up (`portfolio-summary.md` + `recommendations.md`) now lives at `audit/`, disambiguated
+  from each target's per-slice `<target>/.throughline/review-reports/`. Auditor write-scope, templates,
+  and the dashboard updated; no behavior change.
+
 ### Added
 - **Multi-tool adapter generator** — `tools/convert.{ps1,sh}` and `tools/install.{ps1,sh}` render
   thin per-tool wiring from `.throughline/adapters/source/` (personas, commands, hooks, rules). Eleven

@@ -2,7 +2,10 @@
 
 **Purpose**: [what this checklist validates and at which gate]
 **Created**: [DATE]
-**Feature**: [link to spec.md]
+**Feature**: [link to ../spec.md]
+
+> This checklist lives under `<target>/.throughline/specs/[NNN-short-name]/checklists/`, so the
+> spec sits one level up at `../spec.md`.
 
 ## [Category 1]
 

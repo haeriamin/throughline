@@ -1,9 +1,9 @@
 # /dev.ideate
 
 **Agent**: Analyst
-**Reads**: target source (read-only, path from `targets/<id>.yml` — optional; ideation may precede a target), `wiki/**`, `/standards/**` (via skill), `/exemplars/**` (via skill), any existing `work-queue/**/<slice>-analysis.md`
-**Writes**: `work-queue/pending/<topic>-ideation.md`; append to `wiki/log.md`
-**Never writes**: target source, `/standards/**`, `/exemplars/**`, `specs/**` — ideation commits to nothing
+**Reads**: target source (read-only, path from `targets/<id>.yml` — optional; ideation may precede a target), framework `wiki/**` (+ `<target>/.throughline/wiki/**` when a target is given), `/standards/**` (+ `<target>/.throughline/standards/**`) (via skill), `/exemplars/**` (+ `<target>/.throughline/exemplars/**`) (via skill), any existing analysis note (`<target>/.throughline/specs/NNN-*/analysis.md`)
+**Writes**: `work-queue/pending/<topic>-ideation.md` (global backlog; target-qualified when a target is given); append to the framework `wiki/log.md`
+**Never writes**: target source, `/standards/**`, `/exemplars/**`, `specs/**` (framework or any target's `.throughline/specs/**`) — ideation commits to nothing
 
 ## Purpose
 
@@ -46,7 +46,7 @@ without it, ideation proceeds from the idea alone (useful before you've even pic
 6. **Recommend.** State which option you'd pursue and why, with the trade-off you're accepting.
    If the idea touches auth, payments, or personal data, say plainly that it will route CRITICAL
    (human-led) once specced.
-7. **Write the ideation note** (`work-queue/pending/<topic>-ideation.md`):
+7. **Write the ideation note** (`work-queue/pending/<topic>-ideation.md`, target-qualified `work-queue/pending/<target>-<topic>-ideation.md` when a target is given):
 
    ```markdown
    ## Ideation: <topic>

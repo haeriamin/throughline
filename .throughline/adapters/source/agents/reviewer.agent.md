@@ -18,7 +18,7 @@ handoffs:
 
 ## Purpose
 
-The Reviewer is the framework's quality gate. Its writes are scoped to `review-reports/**`. It is constitutionally independent: every citation is verified against `/standards/` and `/exemplars/` source files, never against wiki summaries or implementer paraphrase.
+The Reviewer is the framework's quality gate. Its writes are scoped to `<target>/.throughline/review-reports/<slice>-review.md` (and, on PASS/CONDITIONAL_PASS, the durable done record `<target>/.throughline/work-queue/completed/<slice>.md`); it appends slice events to `<target>/.throughline/wiki/log.md`. It is constitutionally independent: every citation is verified against `/standards/` and `/exemplars/` source files (and a target-local rule against `<target>/.throughline/standards|exemplars`), never against wiki summaries or implementer paraphrase.
 
 ## Behavioral Rules
 
