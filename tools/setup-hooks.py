@@ -272,21 +272,24 @@ def main():
 
     os_name = platform.system() or "unknown"
 
-    # 1. Claude Code: merge hooks into the gitignored machine-local settings.
+    # 1. Claude Code: merge hooks into the gitignored machine-local settings (only when installed).
     claude_local = os.path.join(ROOT, ".claude", "settings.local.json")
-    settings = {}
-    if os.path.exists(claude_local):
-        try:
-            with open(claude_local, encoding="utf-8") as f:
-                settings = json.load(f)
-        except (ValueError, OSError):
-            settings = {}
-    settings["hooks"] = claude_hooks()
-    write_json(claude_local, settings)
+    claude_installed = os.path.exists(os.path.join(ROOT, "CLAUDE.md"))
+    if claude_installed:
+        settings = {}
+        if os.path.exists(claude_local):
+            try:
+                with open(claude_local, encoding="utf-8") as f:
+                    settings = json.load(f)
+            except (ValueError, OSError):
+                settings = {}
+        settings["hooks"] = claude_hooks()
+        write_json(claude_local, settings)
 
-    # 2. Codex: rebuild hooks.json in place for this OS.
+    # 2. Codex: rebuild hooks.json in place for this OS (only when the Codex adapter is installed).
     codex_path = os.path.join(ROOT, ".codex", "hooks.json")
-    if os.path.isdir(os.path.dirname(codex_path)):
+    codex_installed = os.path.isdir(os.path.join(ROOT, ".codex", "prompts"))
+    if codex_installed:
         write_json(codex_path, codex_hooks_json())
 
     # 3. Cursor: install hooks.json from the staged template when the adapter is present.
@@ -296,10 +299,11 @@ def main():
 
     launcher_kind = "powershell + .ps1" if IS_WINDOWS else "bash + .sh"
     print(f"Throughline hooks wired for {os_name} ({launcher_kind}).")
-    print(
-        f"  Claude Code: {os.path.relpath(claude_local, ROOT)} (machine-local, gitignored)"
-    )
-    if os.path.isdir(os.path.dirname(codex_path)):
+    if claude_installed:
+        print(
+            f"  Claude Code: {os.path.relpath(claude_local, ROOT)} (machine-local, gitignored)"
+        )
+    if codex_installed:
         print(f"  Codex:       {os.path.relpath(codex_path, ROOT)}")
     if cursor_out:
         print(
@@ -313,12 +317,13 @@ def main():
         print(
             f"  Kimi Code:   {os.path.relpath(kimi_out, ROOT)} (best-effort matchers until .kimi/VERIFICATION.md passes)"
         )
-    print(
-        "  Copilot:     .github/hooks/hooks.json already carries a per-OS `windows` override; no action needed."
-    )
     if os.path.exists(os.path.join(ROOT, ".github", "hooks", "copilot-cli.json")):
         print(
             "  Copilot CLI: .github/hooks/copilot-cli.json (cross-OS; no per-OS wiring needed)"
+        )
+    if os.path.exists(os.path.join(ROOT, ".github", "hooks", "hooks.json")):
+        print(
+            "  Copilot:     .github/hooks/hooks.json already carries a per-OS `windows` override; no action needed."
         )
     print(
         "  Read-only guard on /standards/ + /exemplars/ is declarative in .claude/settings.json and always on."

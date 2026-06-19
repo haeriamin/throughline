@@ -13,6 +13,9 @@
 - Analysis confidence ≥ 0.70 (Principle V). Below → escalate, don't implement.
 - Reversibility prepared (Principle VI): git target → on branch `sdd/<slice-id>`;
   non-git target → `<target>/.throughline/work-queue/backups/<slice-id>/` ready.
+  Create/switch the branch from the target's default branch **without leaving the framework repo**:
+  `git -C <target-path> checkout <default-branch>` then `git -C <target-path> checkout -b sdd/<slice-id>`
+  (never `cd` into the target — Implementation Rule 9; a single persistent shell would then mis-resolve framework paths).
 
 ## Steps
 

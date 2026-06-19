@@ -33,13 +33,21 @@
    { "folders": [ { "name": "framework", "path": ".." },
                   { "name": "<id>", "path": "<absolute-target-path>" } ] }
    ```
-7. **Scaffold the target's provenance home** at `<target>/<throughline_dir>/` (default `.throughline/`) — where the target's SDD work and knowledge live (ARCHITECTURE §3/§4). Create it in the target working tree (do **not** commit — the human commits it, or it travels on the first slice branch):
+7. **Scaffold the target's provenance home** at `<target>/<throughline_dir>/` (default `.throughline/`) — where the target's SDD work and knowledge live (ARCHITECTURE §3/§4). Create it in the target working tree **on the default branch**: every slice branches off the default branch, so this shared base must live there for the target's accumulated knowledge (wiki delta, registries, decision log) to reach each slice. If it instead only "travels on the first slice branch", a second feature started before that branch merges sees an empty knowledge base (Principle II bootstrap) and the append-only ledgers diverge per branch. Files to create:
    - `standards/` and `exemplars/` each with a `.gitkeep` — human-curated, target-local overrides of the org seeds (read-only to agents; the immutable-path hook guards them).
    - `wiki/` seeded with empty-inventory `standards-summary.md`, `pattern-library.md`, `decision-registry.md`, `exception-registry.md`, `log.md` (this target's slice log), and `concepts/.gitkeep`.
    - `specs/.gitkeep`, `review-reports/.gitkeep`, `work-queue/{completed,escalated,backups}/.gitkeep` (slice folders are created lazily by the lifecycle).
    - a short `README.md` explaining the layout, and a `CHANGELOG.md` stub.
    - if `commit_artifacts: off`: also write `<target>/.throughline/.gitignore` ignoring `specs/`, `review-reports/`, `work-queue/` (the generated SDD work) while keeping `standards/`, `exemplars/`, `wiki/`, `CHANGELOG.md`, `README.md` tracked.
-   Report the created paths.
+   - `<target>/.throughline/.gitattributes` marking the append-only ledgers `merge=union` so concurrent slice branches auto-merge instead of conflicting (git's built-in union driver keeps both sides' added lines):
+     ```gitattributes
+     wiki/log.md merge=union
+     CHANGELOG.md merge=union
+     wiki/decision-registry.md merge=union
+     wiki/exception-registry.md merge=union
+     ```
+   Report the created paths, then **tell the human to commit the scaffold to the default branch** so every future slice inherits the shared knowledge base (this is framework provenance, not product code, and registration is the human's explicit setup step; the agent stages but does not commit the default branch — Principle VI):
+   `git -C <target-path> add .throughline && git -C <target-path> commit -m "throughline: scaffold SDD provenance home"`. Never push or merge. If the human declines, warn that target knowledge will not compound across slices started before the first slice merges.
 8. **Grant target access for each installed tool.** A tool is "installed" when its adapter footprint exists — its manifest (`.throughline/integrations/<tool>.manifest.json`) **or** its generated adapter config (several profiles deliberately emit no manifest, so never rely on the manifest alone): Claude → `.claude/`; Codex → `.codex/` + `AGENTS.md`; Copilot (VS Code) → `.github/copilot-instructions.md`; Copilot CLI → `.github/hooks/copilot-cli.json` + `AGENTS.md`; Cursor → `.cursor/`; Antigravity → `.agents/` + `GEMINI.md`; Kimi → `.kimi/`; OpenCode → `.opencode/` + `opencode.json`; Qwen → `.qwen/` + `QWEN.md`; Aider/Windsurf → their rules bundle. The target path is outside this repo, so each installed tool must be told it may read and write there. Apply only the entries for installed tools; report every change (and explicitly report any tool detected but left unwired).
    - **Claude Code**: add the absolute target path to `permissions.additionalDirectories` in `.claude/settings.local.json` (create with a `permissions` key if absent; merge, don't overwrite). Gitignored — machine paths never land in the shared `settings.json`.
    - **Codex**: Codex sandboxes writes to the workspace root. Add the absolute target path as a writable root in the user's Codex config (`~/.codex/config.toml` → `[sandbox_workspace_write] writable_roots`), or launch Codex with the target as an extra `--cd` root. User-level machine config — print the exact line to add rather than editing it silently.

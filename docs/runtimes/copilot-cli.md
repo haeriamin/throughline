@@ -46,6 +46,8 @@ Use the dev.review agent to review the orders-pagination slice
 
 The constitution, runbooks, and standards are all reachable from `.github/` and `AGENTS.md`, so the agents follow the same lifecycle they do on every other host.
 
+> **Keep the Reviewer independent.** Copilot CLI runs in one terminal session, so the cheapest path — letting the same chat implement *and* review — is the weakest form of the gate (it inherits the builder's working state). Invoke the review as a **separate agent** (`Use the dev.review agent to review the <slice> slice`, or the `/agent` picker) so it starts in a fresh context and re-reads the standards from source. See the Independence Rule in `.github/instructions/review-protocol.instructions.md`.
+
 ## Verification (why this is preview)
 
 The guards are **wired** for enforcement; confirm them on a live Copilot CLI before relying on them:

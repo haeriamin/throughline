@@ -49,6 +49,11 @@ lane. `--micro` is refused for anything analysis classes MEDIUM or above.
 - Target registered and active (`targets/<id>.yml`). Not registered → STOP and instruct:
   `/dev.target register <path>`. Never register implicitly.
 - Parallelism cap: < 3 slices in-progress (constitution-aligned; check `work-queue/in-progress/`).
+- Provenance base on the default branch: the target's `.throughline/` knowledge home (wiki delta,
+  registries, log) should already be committed on the default branch (`/dev.target` step 7) — this
+  slice branches off it and bootstraps from it. If it is missing, the target delta reads empty;
+  proceed, but note that cross-slice knowledge will not compound until earlier slices merge (the
+  `.gitattributes merge=union` scaffolded at register keeps the append-only ledgers conflict-free).
 
 ## Resume Detection (idempotent)
 

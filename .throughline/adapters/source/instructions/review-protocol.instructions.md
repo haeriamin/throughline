@@ -9,7 +9,11 @@ The Reviewer and Implementer are the same model class, so this is **not** human 
 review — two invocations share priors and blind spots. What makes it more than self-grading:
 (a) re-reading primary sources instead of trusting summaries, (b) consuming *executed*
 test evidence rather than claims, (c) deterministic tools deciding the rules they can
-decide, and (d) a fixed structural-fail list that no confidence score can override. Treat
+decide, (d) a fixed structural-fail list that no confidence score can override, and
+(e) running in a **fresh context** — invoke the Reviewer as a separate agent/session, not a
+continuation of the Implementer's window, on any adapter that supports subagents (Claude, Codex,
+Copilot agents, …) so the review does not inherit the builder's working state. Carrying one
+unbroken chat from implement to review is the weakest form of this gate. Treat
 it as a strong lint-plus-traceability gate, not as a guarantee of correctness — the
 human-only merge is the real final check.
 

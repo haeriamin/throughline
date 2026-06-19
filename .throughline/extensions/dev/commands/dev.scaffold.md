@@ -10,6 +10,8 @@
 - Greenfield target registered with `--new` (or empty directory), `vcs: git` initialized.
 - Slice planned and tasked (scaffold tasks appear in `tasks.md` Phase 1).
 - Working on branch `sdd/<slice-id>` (create from default branch if absent — Principle VI).
+  Use the target's absolute path: `git -C <target-path> checkout -b sdd/<slice-id>`; never `cd` into
+  the target (Implementation Rule 9 — keep the shell's cwd at the framework repo root).
 
 ## Steps
 

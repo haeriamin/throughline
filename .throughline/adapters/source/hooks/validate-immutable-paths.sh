@@ -34,14 +34,47 @@ fi
 [ -n "$FILE_PATH" ] || exit 0
 
 NORMALIZED="${FILE_PATH//\\//}"
-# Matches framework org seeds (standards/ + exemplars/) AND target-local overrides
-# (<target>/.throughline/standards|exemplars) via the */standards/* and */exemplars/* segments.
+
+block_immutable() {
+  echo "BLOCKED: '$FILE_PATH' is inside an immutable directory (framework standards/ + exemplars/, or a target's .throughline/standards|exemplars)."
+  echo "Constitution Principle I: these paths are human-curated and READ ONLY to agents."
+  echo "Stop and escalate per .github/instructions/escalation-protocol.instructions.md."
+  exit 2
+}
+
+# 1) Target-local overrides (<target>/.throughline/standards|exemplars) — immutable at any depth.
 case "$NORMALIZED" in
-  standards/*|*/standards/*|exemplars/*|*/exemplars/*)
-    echo "BLOCKED: '$FILE_PATH' is inside an immutable directory (/standards/ or /exemplars/, incl. a target's .throughline/standards|exemplars)."
-    echo "Constitution Principle I: these paths are human-curated and READ ONLY to agents."
-    echo "Stop and escalate per .github/instructions/escalation-protocol.instructions.md."
-    exit 2
-    ;;
+  *"/.throughline/standards/"*|".throughline/standards/"*|*"/.throughline/exemplars/"*|".throughline/exemplars/"*)
+    block_immutable ;;
 esac
+
+# 2) Framework org seeds at the repo root. Find the framework root from THIS script's location
+#    (walk up to the constitution marker) and block only <root>/standards and <root>/exemplars.
+#    Precise by design: a target's own src/standards or src/exemplars folder stays writable (the old
+#    bare "*/standards/*" match blocked it by mistake).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" >/dev/null 2>&1 && pwd)"
+ROOT=""
+d="$SCRIPT_DIR"
+while [ -n "$d" ] && [ "$d" != "/" ]; do
+  if [ -f "$d/.throughline/memory/constitution.md" ]; then ROOT="$d"; break; fi
+  d="$(dirname "$d")"
+done
+
+if [ -n "$ROOT" ]; then
+  ROOTNORM="${ROOT//\\//}"
+  ABS="$NORMALIZED"
+  case "$NORMALIZED" in
+    /*|[A-Za-z]:/*) : ;;                    # already absolute
+    *) ABS="$ROOTNORM/${NORMALIZED#./}" ;;  # relative path → a framework file
+  esac
+  case "$ABS" in
+    "$ROOTNORM/standards"|"$ROOTNORM/standards/"*|"$ROOTNORM/exemplars"|"$ROOTNORM/exemplars/"*)
+      block_immutable ;;
+  esac
+else
+  # Degraded (not inside a framework checkout): block only relative seed paths; never under-block.
+  case "$NORMALIZED" in
+    standards/*|exemplars/*) block_immutable ;;
+  esac
+fi
 exit 0

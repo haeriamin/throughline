@@ -13,6 +13,7 @@
 6. ❌ NEVER add a dependency not named in the plan — stop the task and escalate instead
 7. ❌ NEVER delete code, reduce test surface, or remove comments/docs — annotate instead
 8. ✅ ALWAYS follow the target's detected conventions where standards are silent
+9. ✅ ALWAYS address the target by its absolute path — run git as `git -C <target-path> …` and read/write target files by absolute path. Your working directory is the **framework repo root**; never `cd` into the target. On a single persistent shell (e.g. Copilot CLI) a `cd` into the target silently breaks every later framework-repo path (`work-queue/`, `wiki/log.md`).
 
 ---
 
