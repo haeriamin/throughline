@@ -43,7 +43,7 @@ A change without spec + standard citations is invalid and MUST be rejected by th
 
 ### IV. Annotate, Never Silently Skip
 
-Work that cannot be completed confidently MUST be left in a safe state with a structured `DEV-STATUS` annotation and an entry in `wiki/exception-registry.md`. Silent omission of a requirement, silent stubbing, or unflagged partial implementation is forbidden.
+Work that cannot be completed confidently MUST be left in a safe state with a structured `DEV-STATUS` annotation and an entry in the exception registry — `<target>/.throughline/wiki/exception-registry.md` for slice-scoped work, or the framework `wiki/exception-registry.md` for global-scoped work. Silent omission of a requirement, silent stubbing, or unflagged partial implementation is forbidden.
 
 Annotation format is fixed (see `.github/instructions/implementation-rules.instructions.md` §Unresolved Work).
 
@@ -118,7 +118,7 @@ Every development unit — a feature, a bug fix, a refactor, a new project scaff
 
 ```
 /throughline.constitution   ← ratify or amend this document
-/throughline        ← WHAT to build and WHY (one slice per feature)
+/throughline.specify        ← WHAT to build and WHY (one slice per feature)
 /throughline.clarify        ← resolve [NEEDS CLARIFICATION] markers
 /throughline.plan           ← HOW: analysis, design, architecture decisions
 /throughline.tasks          ← atomic, independently testable tasks
@@ -165,4 +165,4 @@ easily follow is a finding, not a matter of taste.
 - Complexity beyond the simplest workable solution MUST be justified against a specific principle (typically Principle V or the review thresholds).
 - Runtime behavioral guidance lives in `.github/instructions/*.instructions.md`; those files refine but never override this document.
 
-**Version**: 0.3.1 | **Ratified**: 2026-06-09 | **Last Amended**: 2026-06-19 (PATCH: renamed the framework audit roll-up directory `/review-reports/` → `/audit/`, disambiguating it from each target's per-slice `<target>/.throughline/review-reports/`; write-boundary table and Auditor scope updated; no semantic change)
+**Version**: 0.3.2 | **Ratified**: 2026-06-09 | **Last Amended**: 2026-06-19 (PATCH: Principle IV now names the split exception registry — `<target>/.throughline/wiki/exception-registry.md` for slice-scoped work, framework `wiki/exception-registry.md` for global; workflow diagram fixed to read `/throughline.specify`; no semantic change)

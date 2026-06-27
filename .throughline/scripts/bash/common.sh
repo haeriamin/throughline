@@ -23,7 +23,8 @@ read_target_field() {
   root="$(get_repo_root)" || return 1
   yml="$root/targets/$1.yml"
   [ -f "$yml" ] || { echo "ERROR: target '$1' not registered ($yml missing)" >&2; return 1; }
-  v="$(sed -n "s/^[[:space:]]*$2[[:space:]]*:[[:space:]]*//p" "$yml" | head -n1 | sed -e 's/[[:space:]]*#.*$//' -e 's/^"//' -e 's/"$//')"
+  # tr -d '\r' strips CRLF carriage returns so values from Windows-authored target files do not leak a trailing \r.
+  v="$(sed -n "s/^[[:space:]]*$2[[:space:]]*:[[:space:]]*//p" "$yml" | tr -d '\r' | head -n1 | sed -e 's/[[:space:]]*#.*$//' -e 's/^"//' -e 's/"$//')"
   if [ -z "$v" ]; then
     if [ -n "${3:-}" ]; then echo "$3"; return 0; fi
     echo "ERROR: target '$1' has no '$2' in $yml" >&2; return 1

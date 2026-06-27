@@ -19,6 +19,8 @@ powershell -ExecutionPolicy Bypass -File tools/install.ps1 -Tool copilot-cli
 
 This emits `.github/hooks/copilot-cli.json` (the CLI hook config — cross-OS in one file, with both `bash` and `powershell` commands) and regenerates the shared `.github/` content **and root `AGENTS.md`** (the `copilot-cli` profile emits it, so a `--tool copilot-cli` install is self-sufficient — you don't also need `--tool codex`).
 
+> **The `.claude/` mirror is always refreshed.** Every converter run also rewrites `.claude/skills/**` and `.claude/hooks/**` (and `.claude/hooks/README.md`) regardless of `--tool` — this is the always-on Claude Code mirror, kept byte-identical to `.github/skills/**`. Seeing `.claude/` change after a `--tool copilot-cli` install is expected, not a stray write.
+
 Then install the CLI itself and authenticate — a real prerequisite, not a one-liner:
 
 ```bash
@@ -27,6 +29,8 @@ copilot                            # first run: complete the GitHub sign-in, the
 ```
 
 On a locked-down Windows host the bundled shim can be blocked by PowerShell execution policy; install `@github/copilot` directly as above and run it from a normal shell.
+
+> **Under WSL, don't use the VS Code-bundled shim.** That `copilot` shim is a Git-Bash launcher that resolves its runtime through Windows `/c/...` paths. Run from a WSL shell — where the same drive is `/mnt/c/...` — it cannot find itself and fails. Inside WSL, install the standalone CLI with `npm install -g @github/copilot` and run that `copilot`, not the bundled shim.
 
 > **Co-installing with the VS Code Copilot adapter.** Copilot CLI loads **every** `.github/hooks/*.json` and combines them. If you also installed `--tool copilot` (which emits `.github/hooks/hooks.json` in the VS Code `command`/`windows` schema, with no `version` field), the CLI may ignore that file (missing `version`) or mis-read it. For a CLI-first checkout, prefer installing `--tool copilot-cli` alone; if you need both, verify on a live CLI that only `copilot-cli.json` is honored.
 

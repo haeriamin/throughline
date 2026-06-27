@@ -29,7 +29,7 @@
 - **FR-002**: System MUST [specific, testable capability]
 - **FR-003**: Users MUST be able to [key interaction]
 
-*Mark genuinely ambiguous points (max 3): [NEEDS CLARIFICATION: specific question]*
+*Mark genuinely ambiguous points (max 3) with a bracketed NEEDS CLARIFICATION marker and your specific question; resolve and remove every marker before `/throughline.plan`.*
 
 ### Non-Functional Requirements *(include only if relevant)*
 - **NFR-001**: [performance / security / accessibility / compatibility requirement]

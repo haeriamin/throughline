@@ -36,9 +36,8 @@ anything conflicts with the constitution, the constitution wins.
 
 `confidence = 0.40·test_evidence + 0.35·standards_compliance + 0.25·spec_alignment`
 
-PASS ≥ 0.85 · CONDITIONAL_PASS 0.70–0.84 · PARTIAL 0.60–0.69 (annotate the rest) · < 0.60 ESCALATE.
-FAIL at review → max 2 implementer retries, then escalate. Escalation is a success path — never
-guess to avoid it.
+PASS ≥ 0.85 · CONDITIONAL_PASS 0.70–0.84 · FAIL < 0.70 → return to Implementer (max 2 retries),
+then escalate. Escalation is a success path — never guess to avoid it.
 
 ## Structure
 

@@ -24,13 +24,13 @@ at `<target>/.throughline/specs/<active-feature>/plan.md` and the constitution a
 
 `confidence = 0.40·test_evidence + 0.35·standards_compliance + 0.25·spec_alignment`
 
-PASS ≥ 0.85 · CONDITIONAL_PASS 0.70–0.84 · PARTIAL 0.60–0.69 (annotate the rest) · < 0.60 ESCALATE. FAIL at review → max 2 implementer retries, then `/dev.review-escalated`. Escalation is a success path — never guess to avoid it.
+PASS ≥ 0.85 · CONDITIONAL_PASS 0.70–0.84 · FAIL < 0.70 → return to Implementer (max 2 retries), then `/dev.review-escalated`. Escalation is a success path — never guess to avoid it.
 
 ## Command Index
 
 - One-shot pipeline: `/dev.feature <target> "<description>"` — full lifecycle from a single request (empty target → greenfield mode: +design +scaffold)
 - Lifecycle: `/throughline.constitution` · `/throughline.specify` · `/throughline.clarify` · `/throughline.plan` · `/throughline.tasks` · `/throughline.implement` · `/throughline.analyze` · `/throughline.checklist`
-- Dev extension: `/dev.target` · `/dev.ingest-standards` · `/dev.ingest-exemplars` · `/dev.analyze` · `/dev.design` · `/dev.scaffold` · `/dev.implement` · `/dev.test` · `/dev.review` · `/dev.audit` · `/dev.lint-wiki` · `/dev.review-escalated`
+- Dev extension: `/dev.target` · `/dev.ingest-standards` · `/dev.ingest-exemplars` · `/dev.ideate` · `/dev.analyze` · `/dev.design` · `/dev.scaffold` · `/dev.implement` · `/dev.test` · `/dev.review` · `/dev.audit` · `/dev.lint-wiki` · `/dev.review-escalated`
 - Full reference (arguments, writes, gates): `COMMANDS.md`
 
 Each command's agent file (`.github/agents/`) carries its description and persona; `/dev.*` hooks into the lifecycle per `.throughline/extensions.yml` (protocol: `.github/instructions/extension-hooks.instructions.md`).
