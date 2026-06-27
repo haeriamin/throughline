@@ -31,7 +31,21 @@ read_target_field() {
   fi
   echo "$v"
 }
-get_target_root() { read_target_field "$1" "path"; }
+# to_wsl_path: under WSL, map a Windows drive path (C:/... or C:\...) to its /mnt/<drive>/... mount
+# so the bash lifecycle helpers can act on a Windows-checkout target. No-op on native Linux/macOS and
+# under Git Bash (where C:/... already resolves) — gated on WSL detection so it never rewrites elsewhere.
+to_wsl_path() {
+  local p="$1"
+  if grep -qi microsoft /proc/version 2>/dev/null && printf '%s' "$p" | grep -qE '^[A-Za-z]:[/\\]'; then
+    local drive rest
+    drive="$(printf '%s' "$p" | cut -c1 | tr '[:upper:]' '[:lower:]')"
+    rest="$(printf '%s' "$p" | cut -c3- | tr '\\' '/')"
+    printf '/mnt/%s%s' "$drive" "$rest"
+    return 0
+  fi
+  printf '%s' "$p"
+}
+get_target_root() { to_wsl_path "$(read_target_field "$1" "path")"; }
 get_target_throughline_dir() { read_target_field "$1" "throughline_dir" ".throughline"; }
 get_target_specs_dir() {
   local tr td
