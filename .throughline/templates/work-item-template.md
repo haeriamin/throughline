@@ -43,5 +43,5 @@ Used only when Lane = micro; standard/deep lanes use
 
 ## Outcome
 
-- **Verdict**: [PASS | CONDITIONAL_PASS | PARTIAL | FAIL | ESCALATED] (confidence [0.00])
+- **Disposition**: [PASS | CONDITIONAL_PASS | PARTIAL | FAIL | ESCALATED] (confidence [0.00])
 - **Notes**: [retry count, escalation, flagged items if CONDITIONAL_PASS, merge note]

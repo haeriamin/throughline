@@ -779,7 +779,6 @@ See `docs/08-customization.md §File-type cheat sheet` (single source — not du
 ### 17.3 Placeholders to fill before first production run
 
 - `.throughline/extensions/dev/extension.yml` — `repository` URL (after first push)
-- `.throughline/memory/constitution.md` — `Ratified` date
 - `dev-config.yml` (from `config-template.yml`) — per-framework overrides
 - `exemplars/` — initial canonical exemplars beyond the shipped samples (human-curated)
 - `standards/` — beyond the shipped `engineering-standards.md`, `api-design.md`, `security-policy.md`, `testing-standards.md`, add as policy is formalized

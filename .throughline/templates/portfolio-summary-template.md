@@ -12,7 +12,7 @@
 > with < 3 slices reports `INSUFFICIENT-DATA` for systemic analysis — that is **not** a clean bill
 > of health.
 
-## Verdicts per target
+## Outcomes per target
 
 | Target | Slices | PASS | COND | PARTIAL | FAIL | ESCALATED | Mean confidence |
 |--------|-------:|-----:|-----:|--------:|-----:|----------:|-----------------|
